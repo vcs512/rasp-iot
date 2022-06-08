@@ -1,0 +1,13 @@
+[Unit]
+Description=MacBee Bee Monitoring System
+
+[Service]
+User=pi
+Group=pi
+Environment="FLASK_APP=app.py"
+WorkingDirectory=/home/pi/Code/macbee
+ExecStart=/home/pi/Code/macbee/venv/bin/python /home/pi/Code/macbee/macbee.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
