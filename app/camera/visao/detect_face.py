@@ -5,8 +5,9 @@ def detect_face(frame):
     cinza = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     (linhas, colunas) = cinza.shape
     cinza = cv2.resize( cinza, (linhas//2, colunas//2) )
-    frame = cv2.resize( frame, (colunas//2, linhas//2) )
+    frame = cv2.resize( frame, (colunas//4, linhas//4) )
 
+# pouca acuracia
     # face_cascade = cv2.CascadeClassifier('./saved_model/haarcascade_frontalface_default.xml')
     # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(5,5), flags=cv2.CASCADE_SCALE_IMAGE)
@@ -45,8 +46,8 @@ def detect_face(frame):
 
 # ====================================================================
 # testar processamento
-    haar_face_cascade = cv2.CascadeClassifier('./saved_model/haarcascade_frontalface_alt.xml')
-    # haar_face_cascade = cv2.CascadeClassifier('./saved_model/lbpcascade_frontalface.xml')
+    # haar_face_cascade = cv2.CascadeClassifier('./saved_model/haarcascade_frontalface_alt.xml')
+    haar_face_cascade = cv2.CascadeClassifier('./saved_model/lbpcascade_frontalface.xml')
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = haar_face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=2)
 

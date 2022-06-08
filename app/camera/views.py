@@ -149,11 +149,12 @@ def gen_frames():  # generate frame by frame from camera
                 
                 if grey:
                     frame = motion.motion(frame)
-                    # frame = cv2.resize(frame, (w,h))
+                    frame = cv2.resize(frame, (h,w))
 
                     
                 if neg:
                     frame = detect_face.detect_face(frame)
+                    frame = cv2.resize(frame, (h,w))
                     
                 if capture:
                     capture = False
