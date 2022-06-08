@@ -44,6 +44,7 @@ def detect_face(frame):
 
 
 # ====================================================================
+# testar processamento
     haar_face_cascade = cv2.CascadeClassifier('./saved_model/haarcascade_frontalface_alt.xml')
     # haar_face_cascade = cv2.CascadeClassifier('./saved_model/lbpcascade_frontalface.xml')
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
