@@ -10,12 +10,6 @@
 <div class="page-header">
     <h1>Gerenciamento de permissões</h1>
 </div>
-{% set moderate = True %}
-{% include '_comments.html' %}
-{% if pagination %}
-<div class="pagination">
-    {{ macros.pagination_widget(pagination, '.moderate') }}
-</div>
 
 {% if current_user.can(Permission.MODERATE) %}
                     <div class="container">
@@ -25,5 +19,4 @@
                     <div class="row">
 {% endif %}
 
-{% endif %}
 {% endblock %}

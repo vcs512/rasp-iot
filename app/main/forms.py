@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, SelectField,\
-    SubmitField
+    SubmitField, RadioField
 from wtforms.validators import DataRequired, Length, Email, Regexp
 from wtforms import ValidationError
 from flask_pagedown.fields import PageDownField
@@ -58,4 +58,9 @@ class PostForm(FlaskForm):
 
 class CommentForm(FlaskForm):
     body = StringField('Enter your comment', validators=[DataRequired()])
+    submit = SubmitField('Submit')
+
+
+class TrocaRole(FlaskForm):
+    role = RadioField('Nova função', choices=[('1','Usuário'),('2','Moderador'),('3','Admin')])
     submit = SubmitField('Submit')

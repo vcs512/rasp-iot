@@ -1,3 +1,4 @@
+from crypt import methods
 from flask import render_template, redirect, url_for, abort, flash, request,\
     current_app, make_response
 # from ..url_for2 import url_for2
@@ -6,7 +7,7 @@ from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import main
 from .forms import EditProfileForm, EditProfileAdminForm, PostForm,\
-    CommentForm
+    CommentForm, TrocaRole
 from .. import db
 from ..models import Permission, Role, User, Post, Comment
 from ..decorators import admin_required, permission_required
@@ -240,17 +241,58 @@ def show_followed():
     resp.set_cookie('show_followed', '1', max_age=30*24*60*60)
     return resp
 
-@main.route('/moderate')
+@main.route('/moderate/', methods=['GET', 'POST'])
 @login_required
 @permission_required(Permission.MODERATE)
 def moderate():
+
+    form = TrocaRole()
+    if form.validate_on_submit():
+        role = form.role.data
+        
+        usuario = User.query.get_or_404(2)
+        usuario.role_id = role
+
+        db.session.add(usuario)
+        db.session.commit()
+
+        return redirect('/moderate')
+
+
     page = request.args.get('page', 1, type=int)
     pagination = Comment.query.order_by(Comment.timestamp.desc()).paginate(
         page, per_page=current_app.config['FLASKY_COMMENTS_PER_PAGE'],
         error_out=False)
     comments = pagination.items
     return render_template('moderate.html', comments=comments,
-                           pagination=pagination, page=page)
+                           pagination=pagination, page=page, form=form)
+
+
+
+@main.route('/moderate/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MODERATE)
+def moderate_number(id):
+    form = TrocaRole()
+    if form.validate_on_submit():
+    # if request.method == 'POST':
+        role = form.role.data
+        role = int(role)
+        print(type(role))
+        
+        usuario = User.query.get_or_404(id)
+        usuario.role_id = role
+
+        db.session.add(usuario)
+        db.session.commit()
+
+        print(usuario)
+        return redirect('/moderate')
+    
+    return render_template('moderate_number.html', form=form)
+
+
+
 
 
 @main.route('/moderate/enable/<int:id>')
