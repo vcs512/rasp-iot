@@ -117,7 +117,7 @@ https://github.com/informramiz/Face-Detection-OpenCV
 ## Requerimentos OpenCV
 https://stackoverflow.com/questions/53347759/importerror-libcblas-so-3-cannot-open-shared-object-file-no-such-file-or-dire
 
-'''bash
+```bash
         pip3 install opencv-python 
         sudo apt-get install libcblas-dev
         sudo apt-get install libhdf5-dev
@@ -126,8 +126,9 @@ https://stackoverflow.com/questions/53347759/importerror-libcblas-so-3-cannot-op
         sudo apt-get install libjasper-dev 
         sudo apt-get install libqtgui4 
         sudo apt-get install libqt4-test
-'''
+```
 
 
 ## pigpio
-        sudo apt-get install python3-pigpio; sudo pigpiod
+        sudo apt-get install python3-pigpio
+        sudo pigpiod
