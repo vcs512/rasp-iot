@@ -56,7 +56,8 @@ def register():
     if form.validate_on_submit():
         user = User(email=form.email.data,
                     username=form.username.data,
-                    password=form.password.data)
+                    password=form.password.data, 
+                    role_id = 1) #comeca como usuario comum
         db.session.add(user)
         db.session.commit()
 #        token = user.generate_confirmation_token()

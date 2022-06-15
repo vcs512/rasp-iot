@@ -15,7 +15,7 @@ import glob, re
 from app.camera.visao import detect_face, motion
 
 from app.camera.servo import Servo_Control
-from .forms import Controle_servo
+from .forms import Controle_servo, Controle_cam
 
 
 
@@ -36,18 +36,19 @@ grey = False
 neg = False
 camera_on = False
 rec = False
+varre = False
 
 verbose = True
 
-# LEDs state
-leds_status = [False, False, False, False]
-led_labels = { 'led1' : 0, 'led2' : 1, 'led3' : 2, 'led4' : 3}
+# # LEDs state
+# leds_status = [False, False, False, False]
+# led_labels = { 'led1' : 0, 'led2' : 1, 'led3' : 2, 'led4' : 3}
 
-gpio_led1 = 18
-gpio_led2 = 23
-gpio_led3 = 24
-gpio_led4 = 25
-gpio_pins = [gpio_led1, gpio_led2, gpio_led3, gpio_led4]
+# gpio_led1 = 18
+# gpio_led2 = 23
+# gpio_led3 = 24
+# gpio_led4 = 25
+# gpio_pins = [gpio_led1, gpio_led2, gpio_led3, gpio_led4]
 
 camera_device = 0
 
@@ -155,6 +156,13 @@ def gen_frames():  # generate frame by frame from camera
                 if neg:
                     frame = detect_face.detect_face(frame)
                     frame = cv2.resize(frame, (h,w))
+
+                if varre:
+                    th2 = Thread (target = Servo_Control.Varredura_Servos, args= (5,20) )
+                    th2.start()
+                    time.sleep(1)
+                    # print('varrendo')
+                    
                     
                 if capture:
                     capture = False
@@ -182,7 +190,7 @@ def gen_frames():  # generate frame by frame from camera
 @cam.route('/camera', methods=['GET', 'POST'])
 @login_required
 def index():
-    global camera_on, neg, grey, rec, leds_status
+    global camera_on, neg, grey, rec, leds_status, varre
     
     form = Controle_servo()
     if form.validate_on_submit():
@@ -193,8 +201,23 @@ def index():
 
         form.angulo_H.data = ''
         form.angulo_V.data = ''
+        return redirect('/camera')
 
-    return render_template('camera/camera.html', camera_on = camera_on, neg = neg, grey = grey, rec = rec, led1 = leds_status[0], led2 = leds_status[1], led3 = leds_status[2], led4 = leds_status[3], form=form)
+
+
+    # form2 = Controle_cam()
+    # if form2.validate_on_submit():
+    #     view = form2.view.data
+    #     gravacao = form2.gravacao.data
+    #     movimento = form2.movimento.data
+    #     rosto = form2.rosto.data
+
+    #     return redirect('/camera')
+
+
+    # return render_template('camera/camera.html', camera_on = camera_on, neg = neg, grey = grey, rec = rec, led1 = leds_status[0], led2 = leds_status[1], led3 = leds_status[2], led4 = leds_status[3], form=form, form2=form2)
+
+    return render_template('camera/camera.html', camera_on = camera_on, neg = neg, grey = grey, rec = rec, form=form, varre=varre)
 
 
 
@@ -207,22 +230,35 @@ def video_feed():
     else:
         return redirect(url_for('.index'))
 
+
+
 @cam.route('/cam_requests',methods=['POST','GET'])
 @login_required
 def tasks():
-    global camera_on,camera, capture, grey, neg, rec
+    global camera_on,camera, capture, grey, neg, rec, varre
     print('Entering cam_requests')
     if request.method == 'POST':
         if request.form.get('click'):
             capture = True
+        
         elif  request.form.get('color'):
             grey = False
         elif  request.form.get('grey'):
             grey = True
+        
         elif  request.form.get('pos'):
             neg = False
         elif  request.form.get('neg'):
             neg = True
+        
+        elif  request.form.get('para_varredura'):
+            varre = False
+        elif  request.form.get('varrer'):
+            varre = True
+        
+            
+        
+        # visualizar
         elif  request.form.get('start'):
             if not camera_on and not rec:
                 camera = cv2.VideoCapture(camera_device)
@@ -231,6 +267,8 @@ def tasks():
             if camera_on and not rec:
                 camera.release()
             camera_on = False
+        
+        # gravacao
         elif request.form.get('rec_start'):
             if not rec:
                 #Start new thread for recording the video
@@ -283,26 +321,26 @@ def file_action():
 
 
 
-@cam.route('/set_led/<string:led>/<int:on>', methods=['GET'])
-@login_required
-def set_led(led, on):
-    n = led_labels[led]
-    led_set(n, on)
-    return str(on)
+# @cam.route('/set_led/<string:led>/<int:on>', methods=['GET'])
+# @login_required
+# def set_led(led, on):
+#     n = led_labels[led]
+#     led_set(n, on)
+#     return str(on)
 
-@cam.route('/get_led/<string:led>', methods=['GET'])
-@login_required
-def get_led(led):
-    n = led_labels[led]
-    return str('1' if leds_status[led_labels[led]] else '0')
+# @cam.route('/get_led/<string:led>', methods=['GET'])
+# @login_required
+# def get_led(led):
+#     n = led_labels[led]
+#     return str('1' if leds_status[led_labels[led]] else '0')
 
-@cam.route('/set_leds', methods = ['POST'])
-@login_required
-def set_leds():
-    for led in led_labels:
-        if request.form.get(led):
-            led_set(led_labels[led], 1)
-        else:
-            led_set(led_labels[led], 0)
-    return redirect(url_for('cam.index'))
+# @cam.route('/set_leds', methods = ['POST'])
+# @login_required
+# def set_leds():
+#     for led in led_labels:
+#         if request.form.get(led):
+#             led_set(led_labels[led], 1)
+#         else:
+#             led_set(led_labels[led], 0)
+#     return redirect(url_for('cam.index'))
 

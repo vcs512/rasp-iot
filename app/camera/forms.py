@@ -11,4 +11,11 @@ class Controle_servo(FlaskForm):
    angulo_H = IntegerField('Ângulo horizontal')
    angulo_V = IntegerField('Ângulo vertical')
 
-   submit = SubmitField("Send")
+   submit = SubmitField("Mudar câmera")
+
+
+class Controle_cam(FlaskForm):
+    view = SubmitField("Ver camera")  
+    gravacao = SubmitField("Gravar")  
+    movimento = SubmitField("Detectar movimento")  
+    rosto = SubmitField("Detectar rosto")
