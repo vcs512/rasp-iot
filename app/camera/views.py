@@ -56,16 +56,16 @@ if gpio_ok:
     # Set up GPIO pins
     GPIO.setmode(GPIO.BCM)
     GPIO.setwarnings(False)
-    for pin in gpio_pins:
-        GPIO.setup(pin, GPIO.OUT)
-        GPIO.output(pin,0)
+    # for pin in gpio_pins:
+    #     GPIO.setup(pin, GPIO.OUT)
+    #     GPIO.output(pin,0)
 
 def led_set(led, on):
     if verbose:
         print(f'led_set: LED{led + 1} ' + ('ON' if on else 'OFF'))
     leds_status[led] = True if on else False
-    if gpio_ok:
-        GPIO.output(gpio_pins[led], on)
+    # if gpio_ok:
+    #     GPIO.output(gpio_pins[led], on)
 
 # not used anywhere
 def turn_leds_off():

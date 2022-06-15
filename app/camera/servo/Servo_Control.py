@@ -10,14 +10,14 @@ servo_V = 18
 
 #Constantes da Câmera (Informacao no datasheet) https://www.raspberrypi.com/documentation/accessories/camera.html
 f=3.04; #Distancia focal da Câmera [em mm]; 
-Sx=(1.12*10^-3); # Constante de transformação entre pixel para mm;
+Sx=(1.12*10.0**(-3)); # Constante de transformação entre pixel para mm;
 
 #Limites de Rotação [em graus] https://www.datasheet4u.com/datasheet-pdf/TowerPro/SG90/pdf.php?id=791970
 #Deve-se alterar esses limites quando for testado no Tilt (percebi esse problema com o pessoal da outra equipe)
 max_H=90;
 max_V=90;
 min_H=-90;
-min_H=-90;
+min_V=-90;
 
 
 # more info at http://abyz.me.uk/rpi/pigpio/python.html#set_servo_pulsewidth
@@ -110,12 +110,12 @@ def Controle_Manual_V(angulo_V,slp=1): # 'angulo_V' [em graus] define o angulo d
 
 def Varredura_Servos(x,passo=20): # 'x' equivale a tempo [em segundos] de varredura e 'passo' a quantidade de passos dentro do tempo 'x'
 
-    meio_passo = passo/2
-    for i in range(min_H, max_H, max_H/meio_passo):
-        Controle_Manual_H(i, x/meio_passo)
+    meio_passo = passo//2
+    for i in range(min_H, max_H, max_H//meio_passo):
+        Controle_Manual_H(i, x//meio_passo)
     
-    for i in range(max_H, min_H, -max_H/meio_passo):
-        Controle_Manual_H(i, x/meio_passo)
+    for i in range(max_H, min_H, -max_H//meio_passo):
+        Controle_Manual_H(i, x//meio_passo)
 
     #return 0
 
