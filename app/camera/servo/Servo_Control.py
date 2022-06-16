@@ -37,18 +37,20 @@ def toggle_servo(X):#1-Servo ON; 0 - Servo OFF
         pwm.set_PWM_frequency( servo_H, 50 )
         pwm.set_mode(servo_V, pigpio.OUTPUT)
         pwm.set_PWM_frequency( servo_V, 50 )
+        flash('Servos ON')
     else:
         pwm.set_PWM_dutycycle(servo_H, 0)
         pwm.set_PWM_frequency(servo_H, 0)
         pwm.set_PWM_dutycycle(servo_V, 0)
         pwm.set_PWM_frequency(servo_V, 0)
-        flash('Servos OFF');
+        flash('Servos OFF')
 
 def func(x): #Retorna o valor em segundos [para o t_{on} do PWM] da rotacao em graus desejada
-    return ((90-(-90))/(2000-1000))*x+1500 #Funcao de primeiro grau
+    return (2000-1000)/(90-(-90)))*x+1500 #Funcao de primeiro grau: P0=(-90,1000),P1=(0,1500) e P2=(2000,90)
 
 def inv_func(y): #Retorna o valor em graus de um dutycycle em segundos
-    return (50*y-75000)/9 #https://pt.symbolab.com/solver/function-inverse-calculator/inversa%20f%5Cleft(x%5Cright)%3D%5Cleft(%5Cleft(90-%5Cleft(-90%5Cright)%5Cright)%2F%5Cleft(2000-1000%5Cright)%5Cright)%5Ccdot%20x%2B1500?or=input
+    return (y-1500.0)*180.0 
+
 
 def checa_angulo(angulo_V=0,angulo_H=0):#Retorna 0 se estiver errado e flash o periodo correto dos angulos; Retorna 1 se correto;
     #me pergunto o que aconteceria com o flash() se enviasse os dois angulos errados
@@ -121,6 +123,11 @@ def Varredura_Servos(x,passo=20): # 'x' equivale a tempo [em segundos] de varred
 
 #https://abyz.me.uk/rpi/pigpio/pdif2.html
 
+def Angulo_Atual_V()#Retorna o angulo atual do servo motor vertical
+    return inv_func(pwm.get_servo_pulsewidth(servo_V))
+
+def Angulo_Atual_H()#Retorna o angulo altual do servo motor horizontal
+    return inv_func(pwm.get_servo_pulsewidth(servo_H))
         
 def Center_Object_H(pos_H,Resolucao_H=640): # 'pos_H' [em pixel] e 'pos_V' [em pixel] definem o local do Objeto no plano da câmera e 'Resolucao_H' [em pixel] e 'Resolucao_V' [em pixel] a resolução da mesma
 
