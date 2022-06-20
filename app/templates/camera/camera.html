@@ -4,113 +4,153 @@
 {% block title %}Macbee{% endblock %}
 
 {% block page_content %}
+<head>
+    <style>
+    .row {
+    display: flex;
+    }
 
-<!-- <div class="page-header">
-    <h1>Camera</h1>
-</div>
+    .column {
+    float: left;
+    }
 
-    <div class="container">
-        <div class="row">
-            <ul>
-                <li> Camera: {{ "ON" if camera_on else "OFF" }} </li>
-                <li> Recording {{ "ON" if rec else "OFF" }} </li>
-            </ul>
-        </div>
-        <div class="row"> -->
+    .left {
+    width: 60%;
+    }
 
-            <!-- <p><form method="post" action="/set_leds">
-                <table>
-                    <tr>
-                        <td>LEDs:</td>
-                        <td>&nbsp;
-                            <input type="checkbox" id="led1" name="led1" {% if led1 %} checked {% endif %}>
-                            <label for="led1">LED1</label></td>
-                        <td>&nbsp;
-                            <input type="checkbox" id="led2" name="led2" {% if led2 %} checked {% endif %}>
-                            <label for="led2">LED2</label></td>
-                        <td>&nbsp;
-                            <input type="checkbox" id="led3" name="led3" {% if led3 %} checked {% endif %}> 
-                            <label for="led3">LED3</label></td>
-                        <td>&nbsp;
-                            <input type="checkbox" id="led4" name="led4" {% if led4 %} checked {% endif %}>
-                            <label for="led4">LED4</label></td>
-                        <td>&nbsp;
-                            <input type="submit" name="set_leds" value="Set LEDs"></td>
-                    </tr>
-                </table>
-            </form>
-            </p> -->
-           
+    .right {
+    width: 40%;
+    }
+    </style>
+</head>
 
-                <form method="post" action="{{ url_for('cam.tasks') }}">
-                    <p>
-                        {% if camera_on%}
-			                  <input type="submit" value="Stop View" name="stop" />
-                        {% else %}
-                        <input type="submit" value="View Camera" name="start" />
-                        {% endif %}
+            
+{% if controle %}
+<div class="row">
+    
+    <div class="left">
+        {% if camera_on%}
+            <div class="box">
+                <image src="{{ url_for('cam.video_feed') }}"
+                        width="95%"
+                        height="auto">
+            </div>
 
-
-                        {% if rec %}
-			                  <input type="submit" value="Stop Recording" name="rec_stop" />
-                        {% else %}
-			                  <input type="submit" value="Capture" name="click"/>
-
-
-                        {% if grey %}
-			                  <input type="submit" value="Stop Motion" name="color" />
-                        {% else %}
-			                  <input type="submit" value="Motion" name="grey" />
-                        {% endif %}
-
-
-                        {% if neg %}
-			                  <input type="submit" value="Stop Face" name="pos" />
-                        {% else %}
-			                  <input type="submit" value="Face" name="neg" />
-                        {% endif %}
-
-
-                        {% if varre%}
-			                    <input type="submit" value="Parar varredura" name="para_varredura" />
-                        {% else %}
-                                <input type="submit" value="Varredura" name="varrer" />
-                        {% endif %}                        
-
-			                  <input type="submit" value="Start Recording" name="rec_start" />
-                        {% endif %}
-                    </p>
-			          </form>
-
-
-                <br>
-                {% if camera_on %}
-                
-
-                <div class="box">
-                    <image src="{{ url_for('cam.video_feed') }}"
-                    width="70%"
-                    height="auto">
-                </div>
-
-                {% if current_user.can(Permission.MODERATE) %}
-                    <div class="container">
-                        <div class="row">
-                            {{ wtf.quick_form(form) }}
-                        </div>
-                    <div class="row">
-
-
-
-                {% endif %}
-                
-
+            <h4>Save archives</h4>
+            <form method="post" action="{{ url_for('cam.tasks') }}">
+                {% if rec %}
+                    <input type="submit" value="Stop Recording" name="rec_stop" />
                 {% else %}
-                <img src="{{ current_user.gravatar() }}">
+                    <input type="submit" value="Start Recording" name="rec_start" />
+                    
+                    <input type="submit" value="Capture" name="click"/>
                 {% endif %}
-        </div>
+            </form>
+        
+        {% else %}
+            <p> Click in "View Camera"</p>
+        {% endif %}
     </div>
-    <script src="{{url_for('static', filename='led_check.js')}}"></script>
+
+
+    <div class="right">
+        <form method="post" action="{{ url_for('cam.tasks') }}">
+                {% if controle%}
+                    <input type="submit" value="Collapse Controls" name="stop_controls" />
+                {% else %}
+                    <input type="submit" value="View Controls" name="controls" />
+                {% endif %}
+            
+                {% if camera_on%}
+                    <input type="submit" value="Stop View" name="stop" />
+                {% else %}
+                    <input type="submit" value="View Camera" name="start" />
+                {% endif %}
+        <br>
+         
+            {% if camera_on%}
+                {% if rec %}
+                    
+                {% else %}
+        <br>
+                    <h4>Computer Vision</h4>
+                    {% if grey %}
+                        <input type="submit" value="Stop Motion" name="color" />
+                    {% else %}
+                        <input type="submit" value="Motion" name="grey" />
+                    {% endif %}
+
+                    {% if neg %}
+                        <input type="submit" value="Stop Face" name="pos" />
+                    {% else %}
+                        <input type="submit" value="Face" name="neg" />
+                    {% endif %}     
+                {% endif %}
+        <br>
+        <br>
+        {% if current_user.can(Permission.MODERATE) %}
+                <h4>Auto scan</h4>
+                {% if varre%}
+                    <input type="submit" value="Parar varredura" name="para_varredura" />
+                {% else %}
+                    <input type="submit" value="Varredura" name="varrer" />
+                {% endif %}                        
+        {% endif %}
+        
+        <br>
+        <br>
+            {% if current_user.can(Permission.MODERATE) %}
+                <h4>Specific position</h4>
+                {{ wtf.quick_form(form) }}
+            {% endif %}
+        </form>  
+    
+    {% endif %}
+
+    </div>
+
+</div>
+          
+
+{% else %}
+
+<form method="post" action="{{ url_for('cam.tasks') }}">
+    {% if controle%}
+        <input type="submit" value="Collapse Controls" name="stop_controls" />
+    {% else %}
+        <input type="submit" value="View Controls" name="controls" />
+    {% endif %}
+
+    {% if camera_on%}
+    <input type="submit" value="Stop View" name="stop" />
+    
+    <div class="box">
+        <image src="{{ url_for('cam.video_feed') }}"
+                width="55%"
+                height="auto">
+    </div>
+
+    <h4>Save archives</h4>
+    <form method="post" action="{{ url_for('cam.tasks') }}">
+        {% if rec %}
+            <input type="submit" value="Stop Recording" name="rec_stop" />
+        {% else %}
+            <input type="submit" value="Start Recording" name="rec_start" />
+            
+            <input type="submit" value="Capture" name="click"/>
+        {% endif %}
+    </form>
+
+    {% else %}
+    <input type="submit" value="View Camera" name="start" />
+    {% endif %}
+
+
+</form>
+
+{% endif %}
+    
+    <!-- <script src="{{url_for('static', filename='led_check.js')}}"></script> -->
 
 
     {% endblock %}

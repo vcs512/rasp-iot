@@ -46,7 +46,7 @@ def toggle_servo(X):#1-Servo ON; 0 - Servo OFF
         flash('Servos OFF')
 
 def func(x): #Retorna o valor em segundos [para o t_{on} do PWM] da rotacao em graus desejada
-    return (2000-1000)/(90-(-90)))*x+1500 #Funcao de primeiro grau: P0=(-90,1000),P1=(0,1500) e P2=(2000,90)
+    return (2000-1000)/(90-(-90))*x+1500 #Funcao de primeiro grau: P0=(-90,1000),P1=(0,1500) e P2=(2000,90)
 
 def inv_func(y): #Retorna o valor em graus de um dutycycle em segundos
     return (y-1500.0)*180.0 
@@ -123,10 +123,10 @@ def Varredura_Servos(x,passo=20): # 'x' equivale a tempo [em segundos] de varred
 
 #https://abyz.me.uk/rpi/pigpio/pdif2.html
 
-def Angulo_Atual_V()#Retorna o angulo atual do servo motor vertical
+def Angulo_Atual_V(): #Retorna o angulo atual do servo motor vertical
     return inv_func(pwm.get_servo_pulsewidth(servo_V))
 
-def Angulo_Atual_H()#Retorna o angulo altual do servo motor horizontal
+def Angulo_Atual_H(): #Retorna o angulo altual do servo motor horizontal
     return inv_func(pwm.get_servo_pulsewidth(servo_H))
         
 def Center_Object_H(pos_H,Resolucao_H=640): # 'pos_H' [em pixel] e 'pos_V' [em pixel] definem o local do Objeto no plano da câmera e 'Resolucao_H' [em pixel] e 'Resolucao_V' [em pixel] a resolução da mesma

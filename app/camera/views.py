@@ -37,6 +37,7 @@ neg = False
 camera_on = False
 rec = False
 varre = False
+controle = False
 
 verbose = True
 
@@ -190,7 +191,7 @@ def gen_frames():  # generate frame by frame from camera
 @cam.route('/camera', methods=['GET', 'POST'])
 @login_required
 def index():
-    global camera_on, neg, grey, rec, leds_status, varre
+    global camera_on, neg, grey, rec, varre, controle
     
     form = Controle_servo()
     if form.validate_on_submit():
@@ -217,7 +218,7 @@ def index():
 
     # return render_template('camera/camera.html', camera_on = camera_on, neg = neg, grey = grey, rec = rec, led1 = leds_status[0], led2 = leds_status[1], led3 = leds_status[2], led4 = leds_status[3], form=form, form2=form2)
 
-    return render_template('camera/camera.html', camera_on = camera_on, neg = neg, grey = grey, rec = rec, form=form, varre=varre)
+    return render_template('camera/camera.html', camera_on = camera_on, neg = neg, grey = grey, rec = rec, form=form, varre=varre, controle=controle)
 
 
 
@@ -235,12 +236,18 @@ def video_feed():
 @cam.route('/cam_requests',methods=['POST','GET'])
 @login_required
 def tasks():
-    global camera_on,camera, capture, grey, neg, rec, varre
+    global camera_on,camera, capture, grey, neg, rec, varre, controle
     print('Entering cam_requests')
     if request.method == 'POST':
         if request.form.get('click'):
             capture = True
-        
+
+
+        elif  request.form.get('stop_controls'):
+            controle = False
+        elif  request.form.get('controls'):
+            controle = True
+
         elif  request.form.get('color'):
             grey = False
         elif  request.form.get('grey'):

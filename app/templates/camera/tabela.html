@@ -4,95 +4,94 @@
 
 {% block page_content %}
 
-<div class="page-header">
-    <h1>Tabela dos Valores do Campo Magnético</h1>
-</div>
+<h1 id="macbee">Macbee</h1>
+<h1 id="iniciar-servidor">Iniciar servidor</h1>
+<pre><code class="language-bash">export FLASK_APP=macbee.py
+flask run --host 0.0.0.0
+</code></pre>
+<h1 id="banco-de-dados">Banco de Dados</h1>
+<h2 id="para-criar-o-banco-de-dados">Para criar o banco de dados</h2>
+<pre><code class="language-bash">flask db init
+flask db migrate
+flask db upgrade
+</code></pre>
+<p>Abrir shell:</p>
+<pre><code class="language-python">flask shell
+</code></pre>
+<h2 id="roles">Roles</h2>
+<p>Carregar Roles do schema:</p>
+<pre><code class="language-python">Role.insert_roles()
+</code></pre>
+<p>Variáveis dos roles:</p>
+<pre><code class="language-python">role_user = Role.query.filter_by(name=&#39;User&#39;).first()
+role_moderator = Role.query.filter_by(name=&#39;Moderator&#39;).first()
+role_admin = Role.query.filter_by(name=&#39;Administrator&#39;).first()
+</code></pre>
+<p>Procuram a tabela de Roles por nome e encontram sua chave primária.</p>
+<h2 id="usuários">Usuários</h2>
+<h3 id="adicionar">Adicionar</h3>
+<p>Adicionar um usuário com role de administrador:</p>
+<pre><code class="language-python">u = User(email=&#39;john_admin@site.com&#39;, password=&#39;password_of_admin&#39;, name=&#39;John Admin&#39;, username=&#39;john_admin&#39;, confirmed=True, role=role_admin)
+</code></pre>
+<!-- Adicionar um usuário com role de moderador:
 
-<table class="cssTable" border="1">
-    <tr>
-        <th> Tensão no Knob (V)</th>
-        <th> Tensão eficaz verdadeira (V)<a href="#note1">[1]</a> </th>
-        <th> Corrente eficaz (A)</th>
-        <th> Densidade de Fluxo Magnético (mT)<a href="#note2">[2]</a> </th>
-    </tr>
-    <tr>
-        <td> 25 </td>
-        <td> 27 </td>
-        <td> 0,373 </td>
-        <td> 0,95 </td>
-    </tr>
-    <tr>
-        <td> 50 </td>
-        <td> 48,6 </td>
-        <td> 0,65 </td>
-        <td> 1,66 </td>
-    </tr>
-    <tr>
-        <td> 75 </td>
-        <td> 69,8 </td>
-        <td> 0,97 </td>
-        <td> 2,48 </td>
-    </tr>
-    <tr>
-        <td> 100 </td>
-        <td> 90,4 </td>
-        <td> 1,28 </td>
-        <td> 3,27 </td>
-    </tr>
-    <tr>
-        <td> 125 </td>
-        <td> 113,2 </td>
-        <td> 1,62 </td>
-        <td> 4,14 </td>
-    </tr>
-    <tr>
-        <td> 150 </td>
-        <td> 139,2 </td>
-        <td> 1,98 </td>
-        <td> 5,06 </td>
-    </tr>
-    <tr>
-        <td> 175 </td>
-        <td> 166,9 </td>
-        <td> 2,39 </td>
-        <td> 6,10 </td>
-    </tr>
-    <tr>
-        <td> 200 </td>
-        <td> 197 </td>
-        <td> 2,82 </td>
-        <td> 7,20 </td>
-    </tr>
-    <tr>
-        <td> 225 </td>
-        <td> 224,7 </td>
-        <td> 3,24 </td>
-        <td> 8,27 </td>
-    </tr>
-    <tr>
-        <td> MAX </td>
-        <td> 243,1 </td>
-        <td> 3,51 </td>
-        <td> 8,96 </td>
-    </tr>
-</table>
+```python
+u = User(name='John Smith', username='john_smith', password='password_of_john_smith', email='john_smith@site.com', confirmed=True, role=role_moderator)
+```
 
-<p id="note1"> [1] Valores medidos com voltímetro na saída do VARIAC, para uma entrada de tensão de 220V (medida com o voltímetro).</p>
-<p id="note2"> [2] Valor máximo da densidade de fluxo magnético na trajetória de campo mínimo.</p>
+Para adicionar um usuário comum:
 
-<h2>Distribuição da Densidade de Fluxo Magnético</h2>
+```python
+u = User(name='John Doe', username='john_doe', password='password_of_john_doe', email='john_doe@site.com', confirmed=True, role=role_user)
+``` -->
 
-<p>A seguir, a distribuição da Densidade de fluxo magnético para uma corrente com valor eficaz de 2,82A.</p>
+<!-- > Os comandos acima já indicam a senha e que o e-mail do usuário é válido. O suporte a e-mails foi desativado nessa versão inicial, mas pode ser ativado para o caso de ser necessário confirmar os e-mails dos usuários. -->
 
-<p> Os valores são proporcionais à corrente da tabela acima. Por exemplo, para uma corrente de 1,28A, posição 100V para uma rede de 220V, tem-se uma densidade de campo de 7,2 * 1,28 / 2,82 = 3,27mT, na trajetória de menor campo da figura.</p>
+<p>A cada operação no banco de dados é necessário atualizar as alterações:</p>
+<pre><code class="language-python">db.session.add(u)
+db.session.commit()
+</code></pre>
+<h3 id="alterar-campos">Alterar Campos</h3>
+<p>Obter a referência para o objeto do usuário e alterar o campo desejado:</p>
+<pre><code class="language-python">u = User.query.filter_by(username=&#39;john_doe&#39;).first()
+u.role = role_moderator
+db.session.commit()
+</code></pre>
+<h3 id="apagar-usuário">Apagar usuário</h3>
+<p>Procurar e apagar o usuário:</p>
+<pre><code class="language-python">User.query.filter(User.username == &#39;john_doe&#39;).delete()
+db.session.commit()
+</code></pre>
+<h1 id="referências">Referências</h1>
+<h2 id="flask-e-organização-de-projeto">Flask e organização de projeto</h2>
+<p>GRINBERG, Miguel. <strong>Flask web development: developing web applications with python</strong>. &quot; O&#39;Reilly Media, Inc.&quot;, 2018.</p>
+<h2 id="base-inicial-de-projeto">Base inicial de projeto</h2>
+<p><a href="https://github.com/jordeam/macbee">https://github.com/jordeam/macbee</a></p>
+<p><a href="https://github.com/miguelgrinberg/flasky-first-edition">https://github.com/miguelgrinberg/flasky-first-edition</a></p>
+<p><a href="https://github.com/miguelgrinberg/flasky">https://github.com/miguelgrinberg/flasky</a></p>
+<h2 id="streaming-de-camera">Streaming de camera</h2>
+<p><a href="https://towardsdatascience.com/camera-app-with-flask-and-opencv-bd147f6c0eec">https://towardsdatascience.com/camera-app-with-flask-and-opencv-bd147f6c0eec</a></p>
+<p><a href="https://github.com/hemanth-nag/Camera_Flask_App">https://github.com/hemanth-nag/Camera_Flask_App</a></p>
+<h2 id="detecção-de-movimento">Detecção de movimento</h2>
+<p><a href="https://automaticaddison.com/motion-detection-using-opencv-on-raspberry-pi-4/">https://automaticaddison.com/motion-detection-using-opencv-on-raspberry-pi-4/</a></p>
+<h2 id="detecção-de-face">Detecção de face</h2>
+<p><a href="https://github.com/informramiz/Face-Detection-OpenCV">https://github.com/informramiz/Face-Detection-OpenCV</a></p>
+<h2 id="requerimentos-opencv">Requerimentos OpenCV</h2>
+<p><a href="https://stackoverflow.com/questions/53347759/importerror-libcblas-so-3-cannot-open-shared-object-file-no-such-file-or-dire">https://stackoverflow.com/questions/53347759/importerror-libcblas-so-3-cannot-open-shared-object-file-no-such-file-or-dire</a></p>
+<pre><code class="language-bash">pip3 install opencv-python 
+sudo apt-get install libcblas-dev
+sudo apt-get install libhdf5-dev
+sudo apt-get install libhdf5-serial-dev
+sudo apt-get install libatlas-base-dev
+sudo apt-get install libjasper-dev 
+sudo apt-get install libqtgui4 
+sudo apt-get install libqt4-test
+</code></pre>
+<h2 id="pigpio">pigpio</h2>
+<pre><code class="language-bash">sudo apt-get install python3-pigpio
+sudo pigpiod
+</code></pre>
 
-<img src="{{ url_for('static', filename = 'Field-w-4A.svg') }}" alt="Distribuição da Densidade de Fluxo" width="1000">
-
-<h2> Esquema de Ligações</h2>
-
-<p> A figura abaixo mostra o esquema de ligações das bobinas. As duas bibinas devem ser <b> separadas por uma distância de 20cm</b>, que foi a condição de projeto. <b>Os terminais de uma mesma cor devem ser sempre colocados para o mesmo lado</b>, caso contrário, os fluxos ficarão em oposição e o campo será muito mais baixo, anulando-se no centro. <b>Um terminal do VARIAC deve ser conectado a uma cor</b> (por exemplo, vermelho) e <b>o outro terminal, à outra cor </b>(por exemplo, preto). Os terminais restantes devem ser conectados ao VARIAC.
-
-<img src="{{ url_for('static', filename = 'Ligacoes.svg') }}" alt="Esquema de Ligações" width="1000">
 
 {% endblock %}
  
