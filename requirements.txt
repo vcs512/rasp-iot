@@ -44,3 +44,5 @@ Werkzeug==2.0.1
 wheel==0.34.2
 WTForms==2.3.3
 zipp==3.5.0
+Flask-MQTT==1.1.1
+paho-mqtt==1.6.1

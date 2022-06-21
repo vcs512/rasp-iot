@@ -17,6 +17,8 @@ from app.camera.visao import detect_face, motion
 from app.camera.servo import Servo_Control
 from .forms import Controle_servo, Controle_cam
 
+from app.mqtt_func.mqtt_func import client
+from app.mqtt_func import mqtt_func
 
 
 gpio_ok = True
@@ -269,6 +271,7 @@ def tasks():
         elif  request.form.get('start'):
             if not camera_on and not rec:
                 camera = cv2.VideoCapture(camera_device)
+                mqtt_func.publish(client, 'abriu camera')
             camera_on = True
         elif  request.form.get('stop'):
             if camera_on and not rec:

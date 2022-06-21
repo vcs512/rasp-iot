@@ -93,25 +93,17 @@ db.session.commit()
 ## Flask e organização de projeto
 GRINBERG, Miguel. **Flask web development: developing web applications with python**. " O'Reilly Media, Inc.", 2018.
 
-## Base inicial de projeto
+## Base e organização de projeto
 https://github.com/jordeam/macbee
 
 https://github.com/miguelgrinberg/flasky-first-edition
 
 https://github.com/miguelgrinberg/flasky
 
-## Streaming de camera
-https://towardsdatascience.com/camera-app-with-flask-and-opencv-bd147f6c0eec
 
-https://github.com/hemanth-nag/Camera_Flask_App
 
-## Detecção de movimento
-https://automaticaddison.com/motion-detection-using-opencv-on-raspberry-pi-4/
-
-## Detecção de face
-https://github.com/informramiz/Face-Detection-OpenCV
-
-## Requerimentos OpenCV
+## Visão computacional
+### Requerimentos OpenCV
 https://stackoverflow.com/questions/53347759/importerror-libcblas-so-3-cannot-open-shared-object-file-no-such-file-or-dire
 
 ```bash
@@ -126,8 +118,38 @@ sudo apt-get install libqt4-test
 ```
 
 
-## pigpio
+### Streaming de camera
+https://towardsdatascience.com/camera-app-with-flask-and-opencv-bd147f6c0eec
+
+https://github.com/hemanth-nag/Camera_Flask_App
+
+### Detecção de movimento
+https://automaticaddison.com/motion-detection-using-opencv-on-raspberry-pi-4/
+
+### Detecção de face
+https://github.com/informramiz/Face-Detection-OpenCV
+
+
+
+## Controle de servos
+### pigpio
 ```bash
 sudo apt-get install python3-pigpio
 sudo pigpiod
+```
+
+
+## MQTT
+https://flask-mqtt.readthedocs.io/en/latest/usage.html#connect-to-a-broker
+https://github.com/SinaHBN/IoT
+
+### instalar o Mosquitto:
+```bash
+sudo apt install mosquitto
+```
+
+### rodar o cliente simples:
+```bash
+cd cliente
+python cliente_mqtt.py
 ```
