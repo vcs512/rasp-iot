@@ -154,28 +154,3 @@ sudo apt install mosquitto
 cd cliente
 python cliente_mqtt.py
 ```
-
-## Start on boot
-
-Colocar os seguintes comandos em /etc/rc.local
-```bash
-## Change MAC
-ip link set eth0 down
-ip link set eth0 address 00:01:02:03:04:05
-ip link set eth0 up
-
-## Start virtualenv
-. /home/sel/Code/venv/bin/activate
-
-export FLASK_APP=/home/sel/Code/rasp-iot/macbee.py
-
-## Start GPIO daemon
-pigpiod
-
-## Start server
-flask run --host 0.0.0.0
-```
-reiniciar a rasp em seguida: 
-```
-sudo reboot
-```

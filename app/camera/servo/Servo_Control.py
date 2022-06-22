@@ -5,8 +5,8 @@ import math
 from flask import flash
 
 #Portas para os PWM de cada Servo
-servo_H = 17
-servo_V = 18
+servo_H = 18
+servo_V = 17
 
 #Constantes da Câmera (Informacao no datasheet) https://www.raspberrypi.com/documentation/accessories/camera.html
 f=3.04; #Distancia focal da Câmera [em mm]; 
@@ -49,7 +49,7 @@ def func(x): #Retorna o valor em segundos [para o t_{on} do PWM] da rotacao em g
     return (2000-1000)/(90-(-90))*x+1500 #Funcao de primeiro grau: P0=(-90,1000),P1=(0,1500) e P2=(2000,90)
 
 def inv_func(y): #Retorna o valor em graus de um dutycycle em segundos
-    return (y-1500.0)*180.0 
+    return (y-1500.0)*180.0/1000.0 
 
 
 def checa_angulo(angulo_V=0,angulo_H=0):#Retorna 0 se estiver errado e flash o periodo correto dos angulos; Retorna 1 se correto;
@@ -155,7 +155,8 @@ def Center_Object_V(pos_V,Resolucao_V=480): # 'pos_H' [em pixel] e 'pos_V' [em p
     Controle_Manual_V(angulo_V,1)
     
     
-def Center_Object(pos_H,pos_V,Resolucao_H=640,Resolucao_V=480): # 'pos_H' [em pixel] e 'pos_V' [em pixel] definem o local do Objeto no plano da câmera e 'Resolucao_H' [em pixel] e 'Resolucao_V' [em pixel] a resolução da mesma
+def Center_Object(pos_H,pos_V,Resolucao_H=640,Resolucao_V=480):
+    # 'pos_H' [em pixel] e 'pos_V' [em pixel] definem o local do Objeto no plano da câmera e 'Resolucao_H' [em pixel] e 'Resolucao_V' [em pixel] a resolução da mesma
 
     Angulo_Atual_H=inv_func(pwm.get_servo_pulsewidth(servo_H)) 
     Angulo_Atual_V=inv_func(pwm.get_servo_pulsewidth(servo_V)) 

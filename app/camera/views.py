@@ -39,6 +39,7 @@ dec_face = False
 camera_on = False
 rec = False
 varre = False
+varrendo = False
 controle = False
 lock_servos = False
 
@@ -142,7 +143,7 @@ def cam_record():
 
 
 def gen_frames():  # generate frame by frame from camera
-    global out, capture, rec_frame
+    global out, capture, rec_frame, varrendo
     #i=0 # decimar stream de frames para rede neural
     #(startX, startY, endX, endY) = (0,0,0,0)
     
@@ -162,10 +163,16 @@ def gen_frames():  # generate frame by frame from camera
                     frame = cv2.resize(frame, (h,w))
 
                 if varre:
-                    th2 = Thread (target = Servo_Control.Varredura_Servos, args= (5,20) )
-                    th2.start()
-                    # time.sleep(1)
-                    # print('varrendo')
+                    if varrendo:
+                        pass
+                    else:
+                        th2 = Thread (target = Servo_Control.Varredura_Servos, args= (10,20) )
+                        th2.start()
+                        # time.sleep(20)
+                        # Servo_Control.Varredura_Servos(10)
+                        varrendo = True
+                        # time.sleep(1)
+                        # print('varrendo')
                     
                     
                 if capture:
@@ -205,8 +212,8 @@ def index():
         
         Servo_Control.Controle_Manual(angulo_H=angulo_H,angulo_V=angulo_V,slp=1)
 
-        form.angulo_H.data = ''
-        form.angulo_V.data = ''
+        # form.angulo_H.data = ''
+        # form.angulo_V.data = ''
         return redirect('/camera')
 
 
@@ -272,17 +279,19 @@ def tasks():
         # arrow fine servo
         elif  request.form.get('left'):
             angulo_H = Servo_Control.Angulo_Atual_H()
+            # print('angulo = ', angulo_H)
             Servo_Control.Controle_Manual_H(angulo_H-10,slp=1)
         elif  request.form.get('right'):
             angulo_H = Servo_Control.Angulo_Atual_H()
+            # print('angulo = ', angulo_H)
             Servo_Control.Controle_Manual_H(angulo_H+10,slp=1)
 
         elif  request.form.get('down'):
             angulo_V = Servo_Control.Angulo_Atual_V()
-            Servo_Control.Controle_Manual_V(angulo_V-10,slp=1)
+            Servo_Control.Controle_Manual_V(angulo_V+10,slp=1)
         elif  request.form.get('up'):
             angulo_V = Servo_Control.Angulo_Atual_V()
-            Servo_Control.Controle_Manual_V(angulo_V+10,slp=1)
+            Servo_Control.Controle_Manual_V(angulo_V-10,slp=1)
 
 
         # servo sweep

@@ -3,7 +3,8 @@ import time
 from paho.mqtt import client as mqtt_client
 
 
-broker = 'localhost'
+# broker = 'localhost'
+broker = 'broker.hivemq.com'
 port = 1883
 topic = "sel0373/vigiSEL/Motion"
 # generate client ID with pub prefix randomly
