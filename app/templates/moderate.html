@@ -8,7 +8,7 @@
 {% block page_content %}
 
 <div class="page-header">
-    <h1>Gerenciamento de permissões</h1>
+    <h1>User management</h1>
 </div>
 {% set moderate = True %}
 {% include '_comments.html' %}
@@ -17,13 +17,25 @@
     {{ macros.pagination_widget(pagination, '.moderate') }}
 </div>
 
-{% if current_user.can(Permission.MODERATE) %}
-                    <div class="container">
-                        <div class="row">
-                            {{ wtf.quick_form(form) }}
-                        </div>
-                    <div class="row">
-{% endif %}
+<table id="mod_user" class="table table-striped">
+    <thead>
+       <td>e-mail</td>
+       <td>Last seen</td>
+       <td>Role id</td>
+    </thead>
+    
+    {% for row in rows %}
+       <tr>
+          <td>{{row.email}}</td>
+          <td>{{row.last_seen}}</td>
+          <!-- <td> {{ row.role_id}} </td> -->
+          <td> <a href="{{ url_for('main.moderate_number', id=row.id) }}">{{ row.role_id}}</a></td>
+          <!-- <td> <a href="./moderate"></a> {{ row.role_id}}</td>	 -->
+       </tr>
+    {% endfor %}
+ </table>
+
+
 
 {% endif %}
 {% endblock %}

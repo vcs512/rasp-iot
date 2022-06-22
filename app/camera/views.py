@@ -40,6 +40,7 @@ camera_on = False
 rec = False
 varre = False
 controle = False
+lock_servos = False
 
 verbose = True
 
@@ -63,22 +64,22 @@ if gpio_ok:
     #     GPIO.setup(pin, GPIO.OUT)
     #     GPIO.output(pin,0)
 
-def led_set(led, on):
-    if verbose:
-        print(f'led_set: LED{led + 1} ' + ('ON' if on else 'OFF'))
-    leds_status[led] = True if on else False
-    # if gpio_ok:
-    #     GPIO.output(gpio_pins[led], on)
+# def led_set(led, on):
+#     if verbose:
+#         print(f'led_set: LED{led + 1} ' + ('ON' if on else 'OFF'))
+#     leds_status[led] = True if on else False
+#     # if gpio_ok:
+#     #     GPIO.output(gpio_pins[led], on)
 
-# not used anywhere
-def turn_leds_off():
-    for led in range(4):
-        led_set(led, 0)
+# # not used anywhere
+# def turn_leds_off():
+#     for led in range(4):
+#         led_set(led, 0)
 
-# not used anywhere
-def turn_leds_on():
-    for led in range(4):
-        led_set(led, leds_status[led])
+# # not used anywhere
+# def turn_leds_on():
+#     for led in range(4):
+#         led_set(led, leds_status[led])
 
 
 #make shots directory to save pics
@@ -163,7 +164,7 @@ def gen_frames():  # generate frame by frame from camera
                 if varre:
                     th2 = Thread (target = Servo_Control.Varredura_Servos, args= (5,20) )
                     th2.start()
-                    time.sleep(1)
+                    # time.sleep(1)
                     # print('varrendo')
                     
                     
@@ -195,7 +196,7 @@ def gen_frames():  # generate frame by frame from camera
 @cam.route('/camera', methods=['GET', 'POST'])
 @login_required
 def index():
-    global camera_on, dec_face, dec_motion, rec, varre, controle
+    global camera_on, dec_face, dec_motion, rec, varre, controle, lock_servos
     
     form = Controle_servo()
     if form.validate_on_submit():
@@ -222,7 +223,7 @@ def index():
 
     # return render_template('camera/camera.html', camera_on = camera_on, dec_face = dec_face, dec_motion = dec_motion, rec = rec, led1 = leds_status[0], led2 = leds_status[1], led3 = leds_status[2], led4 = leds_status[3], form=form, form2=form2)
 
-    return render_template('camera/camera.html', camera_on = camera_on, dec_face = dec_face, dec_motion = dec_motion, rec = rec, form=form, varre=varre, controle=controle)
+    return render_template('camera/camera.html', camera_on = camera_on, dec_face = dec_face, dec_motion = dec_motion, rec = rec, form=form, varre=varre, controle=controle, lock_servos=lock_servos)
 
 
 
@@ -240,7 +241,7 @@ def video_feed():
 @cam.route('/cam_requests',methods=['POST','GET'])
 @login_required
 def tasks():
-    global camera_on,camera, capture, dec_motion, dec_face, rec, varre, controle
+    global camera_on,camera, capture, dec_motion, dec_face, rec, varre, controle, lock_servos
     print('Entering cam_requests')
     if request.method == 'POST':
         
@@ -289,6 +290,12 @@ def tasks():
             varre = False
         elif  request.form.get('varrer'):
             varre = True
+
+        # lock servos
+        elif  request.form.get('open_servos'):
+            lock_servos = False
+        elif  request.form.get('lock_servos'):
+            lock_servos = True
         
             
         

@@ -8,10 +8,10 @@ from ..models import Role, User
 
 # Pagina 46
 class Controle_servo(FlaskForm):
-   angulo_H = IntegerField('Ângulo horizontal')
-   angulo_V = IntegerField('Ângulo vertical')
+   angulo_H = IntegerField('Horizontal angle')
+   angulo_V = IntegerField('Vertical angle')
 
-   submit = SubmitField("Mudar câmera")
+   submit = SubmitField("Submit specific servo position")
 
 
 class Controle_cam(FlaskForm):

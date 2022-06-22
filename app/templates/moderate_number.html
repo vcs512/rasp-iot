@@ -8,10 +8,12 @@
 {% block page_content %}
 
 <div class="page-header">
-    <h1>Gerenciamento de permissões</h1>
+    <h1>Change role</h1>
 </div>
 
-{% if current_user.can(Permission.MODERATE) %}
+<h3> User: {{ usuario.email }}</h3>
+
+{% if current_user.can(Permission.ADMIN) %}
                     <div class="container">
                         <div class="row">
                             {{ wtf.quick_form(form) }}

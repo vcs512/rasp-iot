@@ -241,23 +241,12 @@ def show_followed():
     resp.set_cookie('show_followed', '1', max_age=30*24*60*60)
     return resp
 
-@main.route('/moderate/', methods=['GET', 'POST'])
+
+@main.route('/moderate/', methods=['GET'])
 @login_required
 @permission_required(Permission.MODERATE)
 def moderate():
-
-    form = TrocaRole()
-    if form.validate_on_submit():
-        role = form.role.data
-        
-        usuario = User.query.get_or_404(2)
-        usuario.role_id = role
-
-        db.session.add(usuario)
-        db.session.commit()
-
-        return redirect('/moderate')
-
+    rows = User.query.all()
 
     page = request.args.get('page', 1, type=int)
     pagination = Comment.query.order_by(Comment.timestamp.desc()).paginate(
@@ -265,7 +254,7 @@ def moderate():
         error_out=False)
     comments = pagination.items
     return render_template('moderate.html', comments=comments,
-                           pagination=pagination, page=page, form=form)
+                           pagination=pagination, page=page, rows=rows)
 
 
 
@@ -274,6 +263,8 @@ def moderate():
 @permission_required(Permission.MODERATE)
 def moderate_number(id):
     form = TrocaRole()
+    usuario = User.query.get_or_404(id)
+    
     if form.validate_on_submit():
     # if request.method == 'POST':
         role = form.role.data
@@ -289,7 +280,7 @@ def moderate_number(id):
         print(usuario)
         return redirect('/moderate')
     
-    return render_template('moderate_number.html', form=form)
+    return render_template('moderate_number.html', form=form, usuario=usuario)
 
 
 

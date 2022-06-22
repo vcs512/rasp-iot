@@ -62,5 +62,5 @@ class CommentForm(FlaskForm):
 
 
 class TrocaRole(FlaskForm):
-    role = RadioField('Nova função', choices=[('1','Usuário'),('2','Moderador'),('3','Admin')])
+    role = RadioField('Nova função', choices=[('1','Usuário'),('2','Moderador')])
     submit = SubmitField('Submit')
