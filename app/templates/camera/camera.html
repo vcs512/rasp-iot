@@ -74,16 +74,16 @@
                 {% else %}
         <br>
                     <h4>Computer Vision</h4>
-                    {% if grey %}
-                        <input type="submit" value="Stop Motion" name="color" />
+                    {% if dec_motion %}
+                        <input type="submit" value="Stop Motion" name="no_motion" />
                     {% else %}
-                        <input type="submit" value="Motion" name="grey" />
+                        <input type="submit" value="Motion" name="dec_motion" />
                     {% endif %}
 
-                    {% if neg %}
-                        <input type="submit" value="Stop Face" name="pos" />
+                    {% if dec_face %}
+                        <input type="submit" value="Stop Face" name="no_face" />
                     {% else %}
-                        <input type="submit" value="Face" name="neg" />
+                        <input type="submit" value="Face" name="dec_face" />
                     {% endif %}     
                 {% endif %}
         <br>

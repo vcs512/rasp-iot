@@ -34,8 +34,8 @@ else:
     print('WARNING: GPIO in failsafe mode')
 
 capture = False
-grey = False
-neg = False
+dec_motion = False
+dec_face = False
 camera_on = False
 rec = False
 varre = False
@@ -151,12 +151,12 @@ def gen_frames():  # generate frame by frame from camera
             if success:
                 (w,h,c) = frame.shape
                 
-                if grey:
+                if dec_motion:
                     frame = motion.motion(frame)
                     frame = cv2.resize(frame, (h,w))
 
                     
-                if neg:
+                if dec_face:
                     frame = detect_face.detect_face(frame)
                     frame = cv2.resize(frame, (h,w))
 
@@ -195,7 +195,7 @@ def gen_frames():  # generate frame by frame from camera
 @cam.route('/camera', methods=['GET', 'POST'])
 @login_required
 def index():
-    global camera_on, neg, grey, rec, varre, controle
+    global camera_on, dec_face, dec_motion, rec, varre, controle
     
     form = Controle_servo()
     if form.validate_on_submit():
@@ -220,9 +220,9 @@ def index():
     #     return redirect('/camera')
 
 
-    # return render_template('camera/camera.html', camera_on = camera_on, neg = neg, grey = grey, rec = rec, led1 = leds_status[0], led2 = leds_status[1], led3 = leds_status[2], led4 = leds_status[3], form=form, form2=form2)
+    # return render_template('camera/camera.html', camera_on = camera_on, dec_face = dec_face, dec_motion = dec_motion, rec = rec, led1 = leds_status[0], led2 = leds_status[1], led3 = leds_status[2], led4 = leds_status[3], form=form, form2=form2)
 
-    return render_template('camera/camera.html', camera_on = camera_on, neg = neg, grey = grey, rec = rec, form=form, varre=varre, controle=controle)
+    return render_template('camera/camera.html', camera_on = camera_on, dec_face = dec_face, dec_motion = dec_motion, rec = rec, form=form, varre=varre, controle=controle)
 
 
 
@@ -240,7 +240,7 @@ def video_feed():
 @cam.route('/cam_requests',methods=['POST','GET'])
 @login_required
 def tasks():
-    global camera_on,camera, capture, grey, neg, rec, varre, controle
+    global camera_on,camera, capture, dec_motion, dec_face, rec, varre, controle
     print('Entering cam_requests')
     if request.method == 'POST':
         
@@ -255,16 +255,16 @@ def tasks():
             controle = True
 
         # motion detection
-        elif  request.form.get('color'):
-            grey = False
-        elif  request.form.get('grey'):
-            grey = True
+        elif  request.form.get('no_motion'):
+            dec_motion = False
+        elif  request.form.get('dec_motion'):
+            dec_motion = True
         
         # face detection
-        elif  request.form.get('pos'):
-            neg = False
-        elif  request.form.get('neg'):
-            neg = True
+        elif  request.form.get('no_face'):
+            dec_face = False
+        elif  request.form.get('dec_face'):
+            dec_face = True
 
 
 
