@@ -141,6 +141,7 @@ sudo pigpiod
 
 ## MQTT
 https://flask-mqtt.readthedocs.io/en/latest/usage.html#connect-to-a-broker
+
 https://github.com/SinaHBN/IoT
 
 ### instalar o Mosquitto:

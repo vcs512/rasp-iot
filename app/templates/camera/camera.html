@@ -96,10 +96,17 @@
                     <input type="submit" value="Varredura" name="varrer" />
                 {% endif %}                        
         {% endif %}
-        
-        <br>
+
         <br>
             {% if current_user.can(Permission.MODERATE) %}
+                <h4>Fine control</h4>
+                <h3>
+                <input type="submit" value='←' name="left"/>
+                <input type="submit" value='→' name="right"/>
+                <input type="submit" value='↑' name="up"/>
+                <input type="submit" value='↓' name="down"/>
+                </h3>
+                
                 <h4>Specific position</h4>
                 {{ wtf.quick_form(form) }}
             {% endif %}

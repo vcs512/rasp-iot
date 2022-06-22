@@ -93,7 +93,8 @@ def Controle_Manual(angulo_H=0,angulo_V=0,slp=1): # 'angulo_H' [em graus] e 'ang
        #return func(float(angulo_H)), func(float(angulo_V)) 
            
 
-def Controle_Manual_H(angulo_H,slp=1): # 'angulo_H' [em graus] define o angulo de rotação e 'slp' o tempo entre comandos [em segundos]
+def Controle_Manual_H(angulo_H,slp=1):
+    ''' 'angulo_H' [em graus] define o angulo de rotação e 'slp' o tempo entre comandos [em segundos]'''
        
     if(checa_angulo(angulo_H)):
        pwm.set_servo_pulsewidth( servo_H, func(float(angulo_H))) ;

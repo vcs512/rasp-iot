@@ -172,6 +172,8 @@ def gen_frames():  # generate frame by frame from camera
                     now = datetime.datetime.now()
                     p = os.path.sep.join(['shots', "shot_{}.png".format(str(now).replace(":",''))])
                     cv2.imwrite(p, frame)
+                
+                
                 try:
                     _, buffer = cv2.imencode('.jpg', cv2.flip(frame,1))
                     frame = buffer.tobytes()
@@ -241,25 +243,48 @@ def tasks():
     global camera_on,camera, capture, grey, neg, rec, varre, controle
     print('Entering cam_requests')
     if request.method == 'POST':
+        
+        # take a picture
         if request.form.get('click'):
             capture = True
 
-
+        # see controls panel
         elif  request.form.get('stop_controls'):
             controle = False
         elif  request.form.get('controls'):
             controle = True
 
+        # motion detection
         elif  request.form.get('color'):
             grey = False
         elif  request.form.get('grey'):
             grey = True
         
+        # face detection
         elif  request.form.get('pos'):
             neg = False
         elif  request.form.get('neg'):
             neg = True
-        
+
+
+
+        # arrow fine servo
+        elif  request.form.get('left'):
+            angulo_H = Servo_Control.Angulo_Atual_H()
+            Servo_Control.Controle_Manual_H(angulo_H-10,slp=1)
+        elif  request.form.get('right'):
+            angulo_H = Servo_Control.Angulo_Atual_H()
+            Servo_Control.Controle_Manual_H(angulo_H+10,slp=1)
+
+        elif  request.form.get('down'):
+            angulo_V = Servo_Control.Angulo_Atual_V()
+            Servo_Control.Controle_Manual_V(angulo_V-10,slp=1)
+        elif  request.form.get('up'):
+            angulo_V = Servo_Control.Angulo_Atual_V()
+            Servo_Control.Controle_Manual_V(angulo_V+10,slp=1)
+
+
+        # servo sweep
         elif  request.form.get('para_varredura'):
             varre = False
         elif  request.form.get('varrer'):
@@ -267,7 +292,7 @@ def tasks():
         
             
         
-        # visualizar
+        # see camera image
         elif  request.form.get('start'):
             if not camera_on and not rec:
                 camera = cv2.VideoCapture(camera_device)
@@ -278,7 +303,7 @@ def tasks():
                 camera.release()
             camera_on = False
         
-        # gravacao
+        # recording
         elif request.form.get('rec_start'):
             if not rec:
                 #Start new thread for recording the video
