@@ -1,13 +1,29 @@
 import cv2
 
-def detect_face(frame):
+def detect_face(frame, w,h):
 
-    cinza = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    (linhas, colunas) = cinza.shape
-    cinza = cv2.resize( cinza, (linhas//2, colunas//2) )
-    frame = cv2.resize( frame, (colunas//4, linhas//4) )
+    # HAAR cascade - better accuracy
+    # haar_face_cascade = cv2.CascadeClassifier('./saved_model/haarcascade_frontalface_alt.xml')
+    
+    # LBP - fast
+    haar_face_cascade = cv2.CascadeClassifier('./saved_model/lbpcascade_frontalface.xml')
+    
+    reduc = 4
+    framer = cv2.resize( frame, (h//reduc, w//reduc) )
+    gray = cv2.cvtColor(framer, cv2.COLOR_BGR2GRAY)
+    faces = haar_face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=2)
 
-# pouca acuracia
+    for (x, y, w, h) in faces:
+        cv2.rectangle(frame, (reduc*x, reduc*y), (reduc*x + reduc*w, reduc*y + reduc*h), (0, 0, 255), 2)
+
+    return frame
+
+    # cinza = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    # (linhas, colunas) = cinza.shape
+    # cinza = cv2.resize( cinza, (linhas//2, colunas//2) )
+    # frame = cv2.resize( frame, (colunas//4, linhas//4) )
+
+    # pouca acuracia
     # face_cascade = cv2.CascadeClassifier('./saved_model/haarcascade_frontalface_default.xml')
     # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(5,5), flags=cv2.CASCADE_SCALE_IMAGE)
@@ -42,16 +58,3 @@ def detect_face(frame):
     #     frame=cv2.resize(frame,dim)
     # except Exception as e:
     #     pass
-
-
-# ====================================================================
-# testar processamento
-    # haar_face_cascade = cv2.CascadeClassifier('./saved_model/haarcascade_frontalface_alt.xml')
-    haar_face_cascade = cv2.CascadeClassifier('./saved_model/lbpcascade_frontalface.xml')
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    faces = haar_face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=2)
-
-    for (x, y, w, h) in faces:
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
-
-    return frame

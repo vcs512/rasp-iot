@@ -1,9 +1,9 @@
-Macbee
+vigiSEL
 ======
 
 # Iniciar servidor
 ```bash
-export FLASK_APP=macbee.py
+export FLASK_APP=vigisel.py
 flask run --host 0.0.0.0
 ```
 
@@ -48,20 +48,6 @@ Adicionar um usuário com role de administrador:
 u = User(email='john_admin@site.com', password='password_of_admin', name='John Admin', username='john_admin', confirmed=True, role=role_admin)
 ```
 
-<!-- Adicionar um usuário com role de moderador:
-
-```python
-u = User(name='John Smith', username='john_smith', password='password_of_john_smith', email='john_smith@site.com', confirmed=True, role=role_moderator)
-```
-
-Para adicionar um usuário comum:
-
-```python
-u = User(name='John Doe', username='john_doe', password='password_of_john_doe', email='john_doe@site.com', confirmed=True, role=role_user)
-``` -->
-
-<!-- > Os comandos acima já indicam a senha e que o e-mail do usuário é válido. O suporte a e-mails foi desativado nessa versão inicial, mas pode ser ativado para o caso de ser necessário confirmar os e-mails dos usuários. -->
-
 A cada operação no banco de dados é necessário atualizar as alterações:
 
 ```python
@@ -85,6 +71,27 @@ Procurar e apagar o usuário:
 ```python
 User.query.filter(User.username == 'john_doe').delete()
 db.session.commit()
+```
+
+## Start on boot
+
+Colocar os seguintes comandos em /etc/rc.local
+```bash
+## Change MAC
+ip link set eth0 down
+ip link set eth0 address 00:01:02:03:04:05
+ip link set eth0 up
+## Start virtualenv
+. /home/sel/Code/venv/bin/activate
+export FLASK_APP=/home/sel/Code/rasp-iot/macbee.py
+## Start GPIO daemon
+pigpiod
+## Start server
+flask run --host 0.0.0.0
+```
+reiniciar a rasp em seguida: 
+```
+sudo reboot
 ```
 
 
@@ -149,7 +156,7 @@ https://github.com/SinaHBN/IoT
 sudo apt install mosquitto
 ```
 
-### rodar o cliente simples:
+### rodar o cliente simples externo:
 ```bash
 cd cliente
 python cliente_mqtt.py

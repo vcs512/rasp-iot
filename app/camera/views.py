@@ -1,38 +1,37 @@
+# flask-WEB
+from concurrent.futures import thread
 from flask import Flask, render_template, Response, request, redirect, url_for, send_file
-# from ..url_for2 import url_for2
-
 from flask_login import login_required, current_user
-import cv2
-import datetime, time
-import os, sys
-import numpy as np
-from threading import Thread
 from . import cam
-from itertools import count
+
+# permissions
+from ..models import Permission, Role
+from ..decorators import admin_required, permission_required
+
+# thread for camera and servos
+from threading import Thread
+
+# saving archives in system
+import datetime, time
 import glob, re
+import os, sys
 
-
+# computer vision and camera
+from itertools import count
+import cv2
+import numpy as np
 from app.camera.visao import detect_face, motion
 
+# servos control
 from app.camera.servo import Servo_Control
 from .forms import Controle_servo, Controle_cam
 
+# MQTT
 from app.mqtt_func.mqtt_func import client
 from app.mqtt_func import mqtt_func
 
 
-gpio_ok = True
-
-try:
-    import RPi.GPIO as GPIO
-except:
-    gpio_ok = False
-
-if gpio_ok:
-    print('GPIO support OK!')
-else:
-    print('WARNING: GPIO in failsafe mode')
-
+# global interfunction variables
 capture = False
 dec_motion = False
 dec_face = False
@@ -43,57 +42,105 @@ varrendo = False
 controle = False
 lock_servos = False
 
-verbose = True
-
-# # LEDs state
-# leds_status = [False, False, False, False]
-# led_labels = { 'led1' : 0, 'led2' : 1, 'led3' : 2, 'led4' : 3}
-
-# gpio_led1 = 18
-# gpio_led2 = 23
-# gpio_led3 = 24
-# gpio_led4 = 25
-# gpio_pins = [gpio_led1, gpio_led2, gpio_led3, gpio_led4]
-
 camera_device = 0
 
-if gpio_ok:
-    # Set up GPIO pins
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setwarnings(False)
-    # for pin in gpio_pins:
-    #     GPIO.setup(pin, GPIO.OUT)
-    #     GPIO.output(pin,0)
+def gen_frames():  
+    '''generator: generate frame by frame from camera'''
 
-# def led_set(led, on):
-#     if verbose:
-#         print(f'led_set: LED{led + 1} ' + ('ON' if on else 'OFF'))
-#     leds_status[led] = True if on else False
-#     # if gpio_ok:
-#     #     GPIO.output(gpio_pins[led], on)
+    global out, capture, rec_frame, varrendo, dec_motion, dec_face, varre
 
-# # not used anywhere
-# def turn_leds_off():
-#     for led in range(4):
-#         led_set(led, 0)
-
-# # not used anywhere
-# def turn_leds_on():
-#     for led in range(4):
-#         led_set(led, leds_status[led])
+    while rec or camera_on:
+        
+        # recording
+        if rec:
+            try:
+                _, buffer = cv2.imencode('.jpg', rec_frame)
+                frame = buffer.tobytes()
+                yield (b'--frame\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            except Exception as e:
+                pass
 
 
-#make shots directory to save pics
-try:
-    os.mkdir('./shots')
-except OSError as error:
-    pass
 
-#make videos directory to save videos
-try:
-    os.mkdir('./videos')
-except OSError as error:
-    pass
+        # just see camera
+        else:
+            success, frame = camera.read()
+            if success:
+                (w,h,_) = frame.shape
+                
+                # modify frame with functions
+                if dec_motion:
+                    frame = motion.motion(frame, w,h)
+                    
+                if dec_face:
+                    frame = detect_face.detect_face(frame, w,h)
+
+                # save picture
+                if capture:
+                    capture = False
+                    now = datetime.datetime.now()
+                    p = os.path.sep.join(['shots', "shot_{}.png".format(str(now).replace(":",''))])
+                    cv2.imwrite(p, frame)
+
+                # servo sweeping
+                if varre:
+                    if varrendo:
+                        dec_motion = False
+                        dec_face = False
+                    else:
+                        th2 = Thread (target = Servo_Control.Varredura_Servos, args= (10,20) )
+                        th2.start()
+                        varrendo = True
+
+                # return frame                    
+                try:
+                    _, buffer = cv2.imencode('.jpg', frame)
+                    frame = buffer.tobytes()
+                    yield (b'--frame\r\n'
+                           b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+                except Exception as e:
+                    pass
+            
+
+
+# this view uses the frame generator
+@cam.route('/video_feed')
+@login_required
+def video_feed():
+    if camera_on or rec:
+        return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    else:
+        return redirect(url_for('.index'))
+
+
+
+# main camera view
+@cam.route('/camera', methods=['GET', 'POST'])
+@login_required
+def index():
+    global camera_on, dec_face, dec_motion, rec, varre, controle, lock_servos
+    
+    form = Controle_servo()
+    if form.validate_on_submit():
+        angulo_H = form.angulo_H.data
+        angulo_V = form.angulo_V.data
+        
+        Servo_Control.Controle_Manual(angulo_H=angulo_H,angulo_V=angulo_V,slp=1)
+
+        return redirect('/camera')
+
+    
+    return render_template('camera/camera.html', camera_on = camera_on, dec_face = dec_face, dec_motion = dec_motion, rec = rec, form=form, varre=varre, controle=controle, lock_servos=lock_servos)
+
+
+@cam.route('/cam_adm',methods=['POST','GET'])
+@login_required
+@permission_required(Permission.ADMIN)
+def teste():
+    return 'so adm'
+
+
 
 def cam_record():
     global rec, rec_frame, rec_status, camera, camera_on
@@ -140,110 +187,6 @@ def cam_record():
     if not camera_on:
         camera.release()
     out.release()
-
-
-def gen_frames():  # generate frame by frame from camera
-    global out, capture, rec_frame, varrendo
-    #i=0 # decimar stream de frames para rede neural
-    #(startX, startY, endX, endY) = (0,0,0,0)
-    
-    while rec or camera_on:
-        if not rec:
-            success, frame = camera.read()
-            if success:
-                (w,h,c) = frame.shape
-                
-                if dec_motion:
-                    frame = motion.motion(frame)
-                    frame = cv2.resize(frame, (h,w))
-
-                    
-                if dec_face:
-                    frame = detect_face.detect_face(frame)
-                    frame = cv2.resize(frame, (h,w))
-
-                if varre:
-                    if varrendo:
-                        pass
-                    else:
-                        th2 = Thread (target = Servo_Control.Varredura_Servos, args= (10,20) )
-                        th2.start()
-                        # time.sleep(20)
-                        # Servo_Control.Varredura_Servos(10)
-                        varrendo = True
-                        # time.sleep(1)
-                        # print('varrendo')
-                    
-                    
-                if capture:
-                    capture = False
-                    now = datetime.datetime.now()
-                    p = os.path.sep.join(['shots', "shot_{}.png".format(str(now).replace(":",''))])
-                    cv2.imwrite(p, frame)
-                
-                
-                try:
-                    _, buffer = cv2.imencode('.jpg', cv2.flip(frame,1))
-                    frame = buffer.tobytes()
-                    yield (b'--frame\r\n'
-                           b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-                except Exception as e:
-                    pass
-        else:
-            try:
-                _, buffer = cv2.imencode('.jpg', rec_frame)
-                frame = buffer.tobytes()
-                yield (b'--frame\r\n'
-                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-            except Exception as e:
-                pass
-
-
-
-@cam.route('/camera', methods=['GET', 'POST'])
-@login_required
-def index():
-    global camera_on, dec_face, dec_motion, rec, varre, controle, lock_servos
-    
-    form = Controle_servo()
-    if form.validate_on_submit():
-        angulo_H = form.angulo_H.data
-        angulo_V = form.angulo_V.data
-        
-        Servo_Control.Controle_Manual(angulo_H=angulo_H,angulo_V=angulo_V,slp=1)
-
-        # form.angulo_H.data = ''
-        # form.angulo_V.data = ''
-        return redirect('/camera')
-
-
-
-    # form2 = Controle_cam()
-    # if form2.validate_on_submit():
-    #     view = form2.view.data
-    #     gravacao = form2.gravacao.data
-    #     movimento = form2.movimento.data
-    #     rosto = form2.rosto.data
-
-    #     return redirect('/camera')
-
-
-    # return render_template('camera/camera.html', camera_on = camera_on, dec_face = dec_face, dec_motion = dec_motion, rec = rec, led1 = leds_status[0], led2 = leds_status[1], led3 = leds_status[2], led4 = leds_status[3], form=form, form2=form2)
-
-    return render_template('camera/camera.html', camera_on = camera_on, dec_face = dec_face, dec_motion = dec_motion, rec = rec, form=form, varre=varre, controle=controle, lock_servos=lock_servos)
-
-
-
-
-@cam.route('/video_feed')
-@login_required
-def video_feed():
-    if camera_on or rec:
-        return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
-    else:
-        return redirect(url_for('.index'))
-
-
 
 @cam.route('/cam_requests',methods=['POST','GET'])
 @login_required
@@ -337,6 +280,11 @@ def tasks():
 def tabela():
     return render_template('camera/tabela.html')
 
+
+
+
+
+
 @cam.route('/files',methods=['POST','GET'])
 @login_required
 def files():
@@ -367,31 +315,3 @@ def file_action():
         print(f'fn={fn}')
         os.unlink(fn)
     return redirect(url_for('cam.files'))
-
-
-
-
-
-# @cam.route('/set_led/<string:led>/<int:on>', methods=['GET'])
-# @login_required
-# def set_led(led, on):
-#     n = led_labels[led]
-#     led_set(n, on)
-#     return str(on)
-
-# @cam.route('/get_led/<string:led>', methods=['GET'])
-# @login_required
-# def get_led(led):
-#     n = led_labels[led]
-#     return str('1' if leds_status[led_labels[led]] else '0')
-
-# @cam.route('/set_leds', methods = ['POST'])
-# @login_required
-# def set_leds():
-#     for led in led_labels:
-#         if request.form.get(led):
-#             led_set(led_labels[led], 1)
-#         else:
-#             led_set(led_labels[led], 0)
-#     return redirect(url_for('cam.index'))
-
