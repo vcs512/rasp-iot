@@ -87,6 +87,12 @@
                     {% else %}
                         <br>
                         {% if current_user.can(Permission.MODERATE) %}
+                            Current servos position:
+                            <ul>
+                                <li>Horizontal angle = {{ angulo_H }}</li>
+                                <li>Vertical angle = {{ angulo_V }}</li>
+                              </ul>
+                        
                             {% if lock_servos%}
                                 <p> Servos locked </p>
             

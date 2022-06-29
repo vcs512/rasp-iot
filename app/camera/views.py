@@ -24,11 +24,31 @@ from app.camera.visao import detect_face, motion
 
 # servos control
 from app.camera.servo import Servo_Control
-from .forms import Controle_servo, Controle_cam
+from .forms import Controle_servo, Servo_adjust
 
 # MQTT
 from app.mqtt_func.mqtt_func import client
 from app.mqtt_func import mqtt_func
+
+
+# try GPIO
+gpio_ok = True
+
+try:
+    import RPi.GPIO as GPIO
+except:
+    gpio_ok = False
+
+if gpio_ok:
+    print('GPIO support OK!')
+else:
+    print('WARNING: GPIO in failsafe mode')
+
+
+if gpio_ok:
+    # Set up GPIO pins
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setwarnings(False)
 
 
 # global interfunction variables
@@ -141,16 +161,35 @@ def camera_cv():
 def servos():
     global camera_on, rec, varre, lock_servos
     
+    if gpio_ok:
+        angulo_H = Servo_Control.Angulo_Atual_H()
+        angulo_V = Servo_Control.Angulo_Atual_V()
+    else:
+        angulo_H = -180
+        angulo_V = -180
+
     form = Controle_servo()
-    if form.validate_on_submit():
-        angulo_H = form.angulo_H.data
-        angulo_V = form.angulo_V.data
+    # form = Servo_adjust()
+    # if form.validate_on_submit():
+    if request.method == 'POST':
+        if form.submit_H.data == True:
+            angulo_H = form.angulo_H.data
+            print('H = ', angulo_H)
+            Servo_Control.Controle_Manual_H(angulo_H=angulo_H,slp=1)
         
-        Servo_Control.Controle_Manual(angulo_H=angulo_H,angulo_V=angulo_V,slp=1)
+        elif form.submit_V.data == True:
+            angulo_V = form.angulo_V.data
+            Servo_Control.Controle_Manual_V(angulo_V=angulo_V,slp=1)
+
+        else:
+            angulo_H = form.angulo_H.data
+            angulo_V = form.angulo_V.data
+            
+            Servo_Control.Controle_Manual(angulo_H=angulo_H,angulo_V=angulo_V,slp=1)
 
         return redirect(url_for(cam.servos))
     
-    return render_template('camera/cam-servos.html', camera_on = camera_on, rec = rec, varre=varre, lock_servos=lock_servos, form=form)
+    return render_template('camera/cam-servos.html', camera_on = camera_on, rec = rec, varre=varre, lock_servos=lock_servos, form=form, angulo_H=angulo_H, angulo_V=angulo_V)
 
 
 
