@@ -156,6 +156,11 @@ https://github.com/SinaHBN/IoT
 sudo apt install mosquitto
 ```
 
+## rodar o mosquitto
+```bash
+sudo systemctl start mosquitto.service
+```
+
 ### rodar o cliente simples externo:
 ```bash
 cd cliente
