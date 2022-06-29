@@ -32,6 +32,40 @@ from app.mqtt_func.mqtt_func import client
 from app.mqtt_func import mqtt_func
 
 
+import trace
+import threading
+class KThread(threading.Thread):
+  def __init__(self, *args, **keywords):
+    threading.Thread.__init__(self, *args, **keywords)
+    self.killed = False
+  def start(self):
+    self.__run_backup = self.run
+    self.run = self.__run     
+    threading.Thread.start(self)
+  def __run(self):
+    sys.settrace(self.globaltrace)
+    self.__run_backup()
+    self.run = self.__run_backup
+  def globaltrace(self, frame, why, arg):
+    if why == 'call':
+      return self.localtrace
+    else:
+      return None
+  def localtrace(self, frame, why, arg):
+    if self.killed:
+      if why == 'line':
+        raise SystemExit()
+    return self.localtrace
+  def kill(self):
+    self.killed = True
+def exfu():
+  print('The function begins')
+  for i in range(1,100):
+    print(i)
+    time.sleep(0.2)
+  print('The function ends') 
+
+
 # try GPIO
 gpio_ok = True
 
@@ -120,14 +154,30 @@ def gen_frames():
                 # servo sweeping
                 if varre:
                     # if varrendo:
-                    if varrendo and th2.is_alive():
-                        dec_motion = False
-                        dec_face = False
-                        varrendo = False
-                    else:
+                    # if varrendo:
+                    #     try:
+                    #         if th2.is_alive():
+                    #             varrendo = False
+                    #     except:
+                    #         dec_motion = False
+                    #         dec_face = False
+                    # else:
+                    try:
+                        if th2.is_alive():
+                            pass
+                    except:
+                        # th2 = KThread(target=Servo_Control.Varredura_Servos, args= (10,20))
                         th2 = Thread (target = Servo_Control.Varredura_Servos, args= (10,20) )
                         th2.start()
-                        varrendo = True
+                        # varrendo = True
+                        dec_motion = False
+                        dec_face = False
+                else:
+                    try:
+                        # th2.kill()
+                        th2.stop()
+                    except:
+                        pass
 
                 # return frame                    
                 try:
@@ -199,8 +249,12 @@ def servos():
     global camera_on, rec, varre, lock_servos
     
     if gpio_ok:
-        angulo_H = Servo_Control.Angulo_Atual_H()
-        angulo_V = Servo_Control.Angulo_Atual_V()
+        try:
+            angulo_H = Servo_Control.Angulo_Atual_H()
+            angulo_V = Servo_Control.Angulo_Atual_V()
+        except:
+            angulo_H = -180
+            angulo_V = -180    
     else:
         angulo_H = -180
         angulo_V = -180
@@ -231,10 +285,12 @@ def servos():
     if formH.validate_on_submit():
         angulo_H = formH.angulo_H.data
         Servo_Control.Controle_Manual_H(angulo_H=angulo_H,slp=1)
+        angulo_V = Servo_Control.Angulo_Atual_V()
 
     if formV.validate_on_submit():
         angulo_V = formV.angulo_V.data
         Servo_Control.Controle_Manual_V(angulo_V=angulo_V,slp=1)
+        angulo_H = Servo_Control.Angulo_Atual_H()
 
     
     return render_template('camera/cam-servos.html', camera_on = camera_on, rec = rec, varre=varre, lock_servos=lock_servos, angulo_H=angulo_H, angulo_V=angulo_V, formH=formH, formV=formV)
