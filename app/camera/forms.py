@@ -24,6 +24,17 @@ class Controle_servo(FlaskForm):
 
     submit = SubmitField("Submit Horizontal and Vertical")
 
+class Servo_H(FlaskForm):
+    '''adjust H servo with integers'''
+
+    angulo_H = IntegerField('Horizontal angle', validators=[NumberRange(min=Servo_Control.min_H, max=Servo_Control.max_H, message='Enter range between {} and {}'.format(Servo_Control.min_H, Servo_Control.max_H))])
+    submit_H = SubmitField("Submit horizontal")
+
+class Servo_V(FlaskForm):
+    '''adjust V servo with integers'''
+
+    angulo_V = IntegerField('Vertical angle', validators=[NumberRange(min=Servo_Control.min_V, max=Servo_Control.max_V, message='Enter range between {} and {}'.format(Servo_Control.min_V, Servo_Control.max_V))])
+    submit_V = SubmitField("Submit vertical")
 
 
 class Servo_adjust(FlaskForm):

@@ -24,7 +24,7 @@ from app.camera.visao import detect_face, motion
 
 # servos control
 from app.camera.servo import Servo_Control
-from .forms import Controle_servo, Servo_adjust
+from .forms import Controle_servo, Servo_H, Servo_V
 
 # MQTT
 from app.mqtt_func.mqtt_func import client
@@ -168,28 +168,39 @@ def servos():
         angulo_H = -180
         angulo_V = -180
 
-    form = Controle_servo()
-    # form = Servo_adjust()
-    # if form.validate_on_submit():
-    if request.method == 'POST':
-        if form.submit_H.data == True:
-            angulo_H = form.angulo_H.data
-            print('H = ', angulo_H)
-            Servo_Control.Controle_Manual_H(angulo_H=angulo_H,slp=1)
+    # form = Controle_servo()
+
+    # if request.method == 'POST':
+    #     if form.submit_H.data == True:
+    #         angulo_H = form.angulo_H.data
+    #         print('H = ', angulo_H)
+    #         Servo_Control.Controle_Manual_H(angulo_H=angulo_H,slp=1)
         
-        elif form.submit_V.data == True:
-            angulo_V = form.angulo_V.data
+    #     elif form.submit_V.data == True:
+    #         angulo_V = form.angulo_V.data
+    #         Servo_Control.Controle_Manual_V(angulo_V=angulo_V,slp=1)
+
+    #     else:
+    #         angulo_H = form.angulo_H.data
+    #         angulo_V = form.angulo_V.data
+            
+    #         Servo_Control.Controle_Manual(angulo_H=angulo_H,angulo_V=angulo_V,slp=1)
+
+    #     return redirect(url_for(cam.servos))
+
+    formH = Servo_H()
+    formV = Servo_V()
+    
+    if formH.validate_on_submit():
+        angulo_H = formH.angulo_H.data
+        Servo_Control.Controle_Manual_H(angulo_H=angulo_H,slp=1)
+
+    if formV.validate_on_submit():
+            angulo_V = formV.angulo_V.data
             Servo_Control.Controle_Manual_V(angulo_V=angulo_V,slp=1)
 
-        else:
-            angulo_H = form.angulo_H.data
-            angulo_V = form.angulo_V.data
-            
-            Servo_Control.Controle_Manual(angulo_H=angulo_H,angulo_V=angulo_V,slp=1)
-
-        return redirect(url_for(cam.servos))
     
-    return render_template('camera/cam-servos.html', camera_on = camera_on, rec = rec, varre=varre, lock_servos=lock_servos, form=form, angulo_H=angulo_H, angulo_V=angulo_V)
+    return render_template('camera/cam-servos.html', camera_on = camera_on, rec = rec, varre=varre, lock_servos=lock_servos, angulo_H=angulo_H, angulo_V=angulo_V, formH=formH, formV=formV)
 
 
 

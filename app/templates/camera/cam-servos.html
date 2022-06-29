@@ -85,23 +85,23 @@
                     {% if rec %}
                         
                     {% else %}
-                        <br>
                         {% if current_user.can(Permission.MODERATE) %}
-                            Current servos position:
-                            <ul>
-                                <li>Horizontal angle = {{ angulo_H }}</li>
-                                <li>Vertical angle = {{ angulo_V }}</li>
-                              </ul>
                         
                             {% if lock_servos%}
                                 <p> Servos locked </p>
+
+                                Current servos position:
+                                <ul>
+                                    <li>Horizontal angle = {{ angulo_H }}</li>
+                                    <li>Vertical angle = {{ angulo_V }}</li>
+                                  </ul>
             
                             {% else %}
                                 <h3>Auto scan</h3>
                                 {% if varre%}
-                                    <input type="submit" value="Parar varredura" name="para_varredura" />
+                                    <input type="submit" value="Stop sweep" name="para_varredura" />
                                 {% else %}
-                                    <input type="submit" value="Varredura" name="varrer" />
+                                    <input type="submit" value="Servo sweep" name="varrer" />
                                 {% endif %}                        
                         
                                 <br>
@@ -116,8 +116,15 @@
                                 </form>
 
                                 <h3>Specific position</h3>
+                                    Current servos position:
+                                    <ul>
+                                        <li>Horizontal angle = {{ angulo_H }}</li>
+                                        <li>Vertical angle = {{ angulo_V }}</li>
+                                    </ul>
+
                                     <form method="post" action="{{ url_for('cam.servos') }}">
-                                        {{ wtf.quick_form(form) }}
+                                        {{ wtf.quick_form(formH) }}
+                                        {{ wtf.quick_form(formV) }}
                                     </form>
                             
                             {% endif %}
