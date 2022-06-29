@@ -1,0 +1,17 @@
+in /home/sel/Code/rasp-iot/app/camera/views.py line 440
+            return send_file('/home/sel/Code/rasp-iot/videos/' + fn)
+            
+in /home/sel/Code/rasp-iot/app/camera/views.py line 117
+                    p = os.path.sep.join(['/home/sel/Code/rasp-iot/shots', "shot_{}.png".format(str(now).replace(":",''))])
+                    
+in /home/sel/Code/rasp-iot/app/templates/camera/camera.html line 58
+<!--                <input type="submit" value="Capture" name="click"/>	-->
+
+in /home/sel/Code/rasp-iot/app/templates/camera/cam-cv.html line 63
+<!--                    <input type="submit" value="Capture" name="click"/>		-->
+
+in in /home/sel/Code/rasp-iot/app/templates/camera/cam-servos.html line 65
+<!--                    <input type="submit" value="Capture" name="click"/>			-->
+
+in /home/sel/Code/rasp-iot/app/templates/camera/tabela.html line 9
+<pre><code class="language-bash">export FLASK_APP=vigisel.py
