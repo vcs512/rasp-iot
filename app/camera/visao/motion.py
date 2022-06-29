@@ -1,20 +1,24 @@
 import cv2
 import numpy as np
 
+# back_sub = cv2.createBackgroundSubtractorMOG2(history=50, varThreshold=25, detectShadows=True)
 
-# Create the background subtractor object
-back_sub = cv2.createBackgroundSubtractorMOG2(history=50, varThreshold=25, detectShadows=True)
+def motion(frame,w,h, back_sub, reduc=2, history=50, dk=50):
+    '''use cv to detect motion
+    
+    history: large = more robust to movement
+    dk:      small = detect minor objects movement
+    '''
 
-# kernel for morphological operation
-#                     sensitivity
-# big dimensions:          -
-# small dimensions:        +
-kernel = np.ones((50,50),np.uint8)
+    # Create the background subtractor object
+    # back_sub = cv2.createBackgroundSubtractorMOG2(history=history, varThreshold=25, detectShadows=True)
 
-def motion(frame, w,h):
-    '''use cv to detect motion'''
+    # kernel for morphological operation
+    #                     sensitivity
+    # big dimensions:          -
+    # small dimensions:        +
+    kernel = np.ones((dk,dk),np.uint8)
 
-    reduc = 2
     cinza = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # (linhas, colunas) = cinza.shape
     cinza = cv2.resize( cinza, (h//reduc, w//reduc) )

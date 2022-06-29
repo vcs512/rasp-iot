@@ -85,23 +85,46 @@
                     {% else %}
                         <br>
                         <h2>Computer Vision</h2>
+
+                        <h3> Motion Detection </h3>
                         {% if dec_motion %}
                             <input type="submit" value="Stop Motion" name="no_motion" />
                         {% else %}
                             <input type="submit" value="Motion" name="dec_motion" />
                         {% endif %}
+        </form> 
             
-                        <br>        
-                        {% if dec_face %}
-                            <input type="submit" value="Stop Face" name="no_face" />
-                        {% else %}
-                            <input type="submit" value="Face" name="dec_face" />
-                        {% endif %}     
-                    {% endif %}         
-    
-                {% endif %}
-        </form>        
+                        {% if current_user.can(Permission.MODERATE) %}
+                            <form method="post" action="{{ url_for('cam.camera_cv') }}">
+                                {{ wtf.quick_form(formHIST) }}
+                                {{ wtf.quick_form(formdk) }}
+                                {{ wtf.quick_form(formLIM) }}
+                            </form>
+                        {% endif %}
 
+                        <br>        
+                        <h3> Face Detection </h3>
+                        <form method="post" action="{{ url_for('cam.tasks') }}">
+                            {% if dec_face %}
+                                <input type="submit" value="Stop Face" name="no_face" />
+                            {% else %}
+                                <input type="submit" value="Face" name="dec_face" />
+                            {% endif %}     
+
+
+                            {% if current_user.can(Permission.MODERATE) %}
+                                <form method="post" action="{{ url_for('cam.camera_cv') }}">
+                                    {{ wtf.quick_form(formSCALE) }}
+                                    {{ wtf.quick_form(formNEIG) }}
+                                </form>
+                            {% endif %}
+
+
+                    {% endif %}         
+                        </form> 
+                
+                {% endif %}
+                               
     </div>
 
 </div>

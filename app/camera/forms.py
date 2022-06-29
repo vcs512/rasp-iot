@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, SelectField,\
-    SubmitField, IntegerField
+    SubmitField, IntegerField, FloatField
 from wtforms.fields.html5 import IntegerRangeField
 
 from wtforms.validators import DataRequired, Length, Email, Regexp, NumberRange
@@ -47,3 +47,34 @@ class Servo_adjust(FlaskForm):
     # submit_V = SubmitField("Submit vertical")
 
     submit = SubmitField("Submit Horizontal and Vertical")
+
+class cv_hist(FlaskForm):
+    '''adjust number of frames for history in motion detection'''
+
+    history = IntegerField('Number of past frames to considerate', validators=[NumberRange(min=1, max=1e6, message='Enter range between {} and {}'.format(1, 1e6))])
+    submit = SubmitField("Submit number of past frames")
+
+class cv_dk(FlaskForm):
+    '''adjust kernel size in motion detection'''
+
+    dk = IntegerField('Kernel size', validators=[NumberRange(min=1, max=200, message='Enter range between {} and {}'.format(1, 200))])
+    submit = SubmitField("Submit kernel size")    
+
+class cv_lim_bin(FlaskForm):
+    '''adjust kernel size in motion detection'''
+
+    lim = IntegerField('Threshold value', validators=[NumberRange(min=5, max=250, message='Enter range between {} and {}'.format(5, 250))])
+    submit = SubmitField("Submit threshold value")
+
+
+class cv_scale(FlaskForm):
+    '''adjust scale factor in face detection'''
+
+    scale = FloatField('Scale factor', validators=[NumberRange(min=0.5, max=5, message='Enter range between {} and {}'.format(0.5, 5))])
+    submit = SubmitField("Submit scale factor")    
+
+class cv_min_neig(FlaskForm):
+    '''minimum Neighbors in face detection'''
+
+    min = IntegerField('Minimum Neighbors', validators=[NumberRange(min=2, max=40, message='Enter range between {} and {}'.format(2, 40))])
+    submit = SubmitField("Submit minimum neighbors")       

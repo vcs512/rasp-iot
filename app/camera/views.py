@@ -21,6 +21,7 @@ from itertools import count
 import cv2
 import numpy as np
 from app.camera.visao import detect_face, motion
+from .forms import cv_hist, cv_dk, cv_lim_bin, cv_scale, cv_min_neig
 
 # servos control
 from app.camera.servo import Servo_Control
@@ -53,21 +54,30 @@ if gpio_ok:
 
 # global interfunction variables
 capture = False
-dec_motion = False
-dec_face = False
 camera_on = False
 rec = False
+
 varre = False
 varrendo = False
-# controle = False
 lock_servos = False
+# controle = False
+
+dec_motion = False
+dec_face = False
+back_sub = cv2.createBackgroundSubtractorMOG2(history=50, varThreshold=80, detectShadows=True)    
+history = 50
+dk = 50
+lim_bin = 80
+
+face_scale = 1.1
+min_vizinhos = 2
 
 camera_device = 0
 
 def gen_frames():  
     '''generator: generate frame by frame from camera'''
 
-    global out, capture, rec_frame, varrendo, dec_motion, dec_face, varre
+    global out, capture, rec_frame, varrendo, dec_motion, dec_face, varre, back_sub, history, dk, lim_bin, face_scale, min_vizinhos
 
     while rec or camera_on:
         
@@ -91,10 +101,11 @@ def gen_frames():
                 
                 # modify frame with functions
                 if dec_motion:
-                    frame = motion.motion(frame, w,h)
+                    frame = motion.motion(frame,w,h, back_sub, reduc=2, history=history, dk=dk)
+                    
                     
                 if dec_face:
-                    frame = detect_face.detect_face(frame, w,h)
+                    frame = detect_face.detect_face(frame,w,h, scaleFactor=face_scale, minNeighbors=min_vizinhos)
 
                 # save picture
                 if capture:
@@ -147,12 +158,35 @@ def index():
 
 
 # computer vision view
-@cam.route('/camera_cv', methods=['GET'])
+@cam.route('/camera_cv', methods=['GET', 'POST'])
 @login_required
 def camera_cv():
-    global camera_on, dec_face, dec_motion, rec, varre
-    
-    return render_template('camera/cam-cv.html', camera_on = camera_on, rec = rec, dec_face = dec_face, dec_motion = dec_motion)
+    global camera_on, dec_face, dec_motion, rec, varre, back_sub, dk, lim_bin, history, face_scale, min_vizinhos
+
+    formHIST = cv_hist()
+    if formHIST.validate_on_submit():
+        history = formHIST.history.data
+        back_sub = cv2.createBackgroundSubtractorMOG2(history=history, varThreshold=lim_bin, detectShadows=True)    
+
+    formLIM = cv_lim_bin()
+    if formLIM.validate_on_submit():
+        lim_bin = formLIM.lim.data
+        back_sub = cv2.createBackgroundSubtractorMOG2(history=history, varThreshold=lim_bin, detectShadows=True)    
+
+    formdk = cv_dk()
+    if formdk.validate_on_submit():
+        dk = formdk.dk.data        
+
+
+    formSCALE = cv_scale()
+    if formSCALE.validate_on_submit():
+        face_scale = formSCALE.scale.data  
+
+    formNEIG = cv_min_neig()
+    if formNEIG.validate_on_submit():
+        min_vizinhos = formNEIG.min.data          
+
+    return render_template('camera/cam-cv.html', camera_on = camera_on, rec = rec, dec_face = dec_face, dec_motion = dec_motion, formHIST=formHIST, formdk=formdk, formLIM=formLIM, formSCALE=formSCALE, formNEIG=formNEIG)
 
 
 # servo control view
@@ -196,8 +230,8 @@ def servos():
         Servo_Control.Controle_Manual_H(angulo_H=angulo_H,slp=1)
 
     if formV.validate_on_submit():
-            angulo_V = formV.angulo_V.data
-            Servo_Control.Controle_Manual_V(angulo_V=angulo_V,slp=1)
+        angulo_V = formV.angulo_V.data
+        Servo_Control.Controle_Manual_V(angulo_V=angulo_V,slp=1)
 
     
     return render_template('camera/cam-servos.html', camera_on = camera_on, rec = rec, varre=varre, lock_servos=lock_servos, angulo_H=angulo_H, angulo_V=angulo_V, formH=formH, formV=formV)
@@ -286,7 +320,7 @@ def tasks():
             dec_motion = False
         elif  request.form.get('dec_motion'):
             dec_motion = True
-        
+
         # face detection
         elif  request.form.get('no_face'):
             dec_face = False
