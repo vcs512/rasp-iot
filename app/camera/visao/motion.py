@@ -44,7 +44,7 @@ def motion(frame,w,h, back_sub, reduc=2, history=50, dk=50):
     # If there are no countours
     if len(areas) < 1:
         # frame = cv2.resize( frame, (linhas, colunas))
-        return frame
+        return frame, [320,240], [320,240]
   
     else:
         # largest moving object
@@ -55,4 +55,4 @@ def motion(frame,w,h, back_sub, reduc=2, history=50, dk=50):
     x,y,w,h = cv2.boundingRect(cnt)
     cv2.rectangle(frame,(reduc*x,reduc*y),(reduc*(x+w),reduc*(y+h)),(0,255,0),3)
 
-    return frame
+    return frame, [reduc*x,reduc*y], [reduc*(x+w),reduc*(y+h)]

@@ -60,6 +60,8 @@ rec = False
 varre = False
 varrendo = False
 lock_servos = False
+follow_motion = False
+follow_face = False
 # controle = False
 
 dec_motion = False
@@ -78,6 +80,7 @@ def gen_frames():
     '''generator: generate frame by frame from camera'''
 
     global out, capture, rec_frame, varrendo, dec_motion, dec_face, varre, back_sub, history, dk, lim_bin, face_scale, min_vizinhos
+    global a,b
 
     while rec or camera_on:
         
@@ -101,7 +104,7 @@ def gen_frames():
                 
                 # modify frame with functions
                 if dec_motion:
-                    frame = motion.motion(frame,w,h, back_sub, reduc=2, history=history, dk=dk)
+                    frame, a, b = motion.motion(frame,w,h, back_sub, reduc=2, history=history, dk=dk)
                     
                     
                 if dec_face:
@@ -301,7 +304,8 @@ def cam_record():
 @cam.route('/cam_requests',methods=['POST','GET'])
 @login_required
 def tasks():
-    global camera_on,camera, capture, dec_motion, dec_face, rec, varre, lock_servos
+    global camera_on,camera, capture, dec_motion, dec_face, rec, varre, lock_servos, follow_motion, follow_face
+    global a,b
     print('Entering cam_requests')
     if request.method == 'POST':
         
@@ -320,6 +324,19 @@ def tasks():
             dec_motion = False
         elif  request.form.get('dec_motion'):
             dec_motion = True
+
+        elif  request.form.get('follow_motion'):
+            # follow_motion = True
+            print('a = ', a)
+            pos_H = (a+b)[0]//2
+            print('pos_H = ', pos_H)
+            pos_V = (a+b)[1]//2
+            Servo_Control.Center_Object(pos_H,pos_V,Resolucao_H=640,Resolucao_V=480)
+
+
+        elif  request.form.get('follow_face'):
+            follow_face = True
+
 
         # face detection
         elif  request.form.get('no_face'):
