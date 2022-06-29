@@ -14,10 +14,10 @@ Sx=(1.12*10.0**(-3)); # Constante de transformação entre pixel para mm;
 
 #Limites de Rotação [em graus] https://www.datasheet4u.com/datasheet-pdf/TowerPro/SG90/pdf.php?id=791970
 #Deve-se alterar esses limites quando for testado no Tilt (percebi esse problema com o pessoal da outra equipe)
-max_H=120;
-max_V=120;
-min_H=0;
-min_V=0;
+max_H=90;
+max_V=90;
+min_H=-90;
+min_V=-90;
 
 
 # more info at http://abyz.me.uk/rpi/pigpio/python.html#set_servo_pulsewidth
@@ -46,7 +46,7 @@ def toggle_servo(X):#1-Servo ON; 0 - Servo OFF
         flash('Servos OFF')
 
 def func(x): #Retorna o valor em segundos [para o t_{on} do PWM] da rotacao em graus desejada
-    return (2500-500)/(0-(-180))*x+500 #Funcao de primeiro grau: P0=(-90,1000),P1=(0,1500) e P2=(2000,90)
+    return (2000-1000)/(0-(-180))*x+1500 #Funcao de primeiro grau: P0=(-90,1000),P1=(0,1500) e P2=(2000,90)
 
 def inv_func(y): #Retorna o valor em graus de um dutycycle em segundos
     return (y-1500.0)*180.0/1000.0 
@@ -66,7 +66,7 @@ def checa_angulo(angulo_V=0,angulo_H=0):#Retorna 0 se estiver errado e flash o p
         flash(message)
         
         if (float(angulo_V)<min_V or float(angulo_V)>max_V):
-            if (float(angulo_V)<min_v):
+            if (float(angulo_V)<min_V):
                 pwm.set_servo_pulsewidth( servo_V, func(min_V));
             elif (float(angulo_V)>max_V):
                 pwm.set_servo_pulsewidth( servo_V, func(max_V));
@@ -114,11 +114,13 @@ def Controle_Manual_V(angulo_V,slp=1): # 'angulo_V' [em graus] define o angulo d
 def Varredura_Servos(x,passo=20): # 'x' equivale a tempo [em segundos] de varredura e 'passo' a quantidade de passos dentro do tempo 'x'
 
     meio_passo = passo//2
-    for i in range(min_H, max_H, max_H//meio_passo):
-        Controle_Manual_H(i, x//meio_passo)
-    
-    for i in range(max_H, min_H, -max_H//meio_passo):
-        Controle_Manual_H(i, x//meio_passo)
+
+    while True:
+        for i in range(min_H, max_H, max_H//meio_passo):
+            Controle_Manual_H(i, x//meio_passo)
+        
+        for i in range(max_H, min_H, -max_H//meio_passo):
+            Controle_Manual_H(i, x//meio_passo)
 
     #return 0
 
@@ -155,23 +157,39 @@ def Center_Object_V(pos_V,Resolucao_V=480): # 'pos_H' [em pixel] e 'pos_V' [em p
     Controle_Manual_V(angulo_V,1)
     
     
-def Center_Object(pos_H,pos_V,Resolucao_H=640,Resolucao_V=480):
+def Center_Object(pos_H,pos_V,Resolucao_H=3280,Resolucao_V=2464):
     # 'pos_H' [em pixel] e 'pos_V' [em pixel] definem o local do Objeto no plano da câmera e 'Resolucao_H' [em pixel] e 'Resolucao_V' [em pixel] a resolução da mesma
 
     Angulo_Atual_H=inv_func(pwm.get_servo_pulsewidth(servo_H)) 
     Angulo_Atual_V=inv_func(pwm.get_servo_pulsewidth(servo_V)) 
-    if pos_H>=Resolucao_H/2.0:
-        Sinal_H=1.0
-    else:
-        Sinal_H=-1.0
+    
+    Sinal_V=0.0
+    Sinal_H=0.0
+    if Angulo_Atual_H >= 0:
+        if pos_H>=Resolucao_H/2.0:
+            Sinal_H=1.0
+        else:
+            Sinal_H=-1.0
+    elif Angulo_Atual_H < 0:
+        if pos_H>=Resolucao_H/2.0:
+            Sinal_H=-1.0
+        else:
+            Sinal_H=1.0
+    if Angulo_Atual_V < 0:
+        if pos_V>=Resolucao_V/2.0:
+            Sinal_V=-1.0
+        else:
+            Sinal_V=1.0 
 
-    if pos_V>=Resolucao_V/2.0:
-        Sinal_V=1.0
-    else:
-        Sinal_V=-1.0
+    elif Angulo_Atual_V < 0:
 
-    angulo_H=Angulo_Atual_H+Sinal_H*math.degrees(math.atan((1.0*math.fabs(pos_H-Resolucao_H/2.0)*Sx)/f))
-    angulo_V=Angulo_Atual_V+Sinal_V*math.degrees(math.atan((1.0*math.fabs(pos_V-Resolucao_V/2.0)*Sx)/f))
+        if pos_V>=Resolucao_V/2.0:
+            Sinal_V=1.0
+        else:
+            Sinal_V=-1.0      
+
+    angulo_H=Angulo_Atual_H+1.0*Sinal_H*math.degrees(math.atan((1.0*math.fabs(pos_H-Resolucao_H/2.0)*Sx)/f))
+    angulo_V=Angulo_Atual_V+1.0*Sinal_V*math.degrees(math.atan((1.0*math.fabs(pos_V-Resolucao_V/2.0)*Sx)/f))
     
     Controle_Manual(angulo_H,angulo_V,1)
         
