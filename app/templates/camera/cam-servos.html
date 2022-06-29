@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}VigiSEL{% endblock %}
+
+{% block page_content %}
+<head>
+    <style>
+    .row {
+    display: flex;
+    }
+
+    .column {
+    float: left;
+    }
+
+    .left {
+    width: 60%;
+    }
+
+    .right {
+    width: 40%;
+    }
+
+    .button-container form,
+    .button-container form div {
+        display: inline;
+    }
+    .button-container button {
+        display: inline;
+    }
+    </style>
+</head>
+
+      
+
+
+<div class="button-container">
+    <form action="{{ url_for('cam.index') }}">
+        <button type="submit"> Full Camera </button>
+    </form>
+
+    <form action="{{ url_for('cam.camera_cv') }}">
+        <button type="submit"> Computer Vision </button>
+    </form>
+</div>
+
+<div class="row">
+    
+    <div class="left">
+        {% if camera_on%}
+            <div class="box">
+                <image src="{{ url_for('cam.video_feed') }}"
+                        width="95%"
+                        height="auto">
+            </div>
+
+            <h4>Save archives</h4>
+            <form method="post" action="{{ url_for('cam.tasks') }}">
+                {% if rec %}
+                    <input type="submit" value="Stop Recording" name="rec_stop" />
+                {% else %}
+                    <input type="submit" value="Start Recording" name="rec_start" />
+                    
+                    <input type="submit" value="Capture" name="click"/>
+                {% endif %}
+            </form>
+        
+        {% else %}
+            <p> Click in "View Camera"</p>
+        {% endif %}
+    </div>
+
+
+    <div class="right">
+        <form method="post" action="{{ url_for('cam.tasks') }}">
+                {% if camera_on%}
+                    <input type="submit" value="Stop View" name="stop" />
+                {% else %}
+                    <input type="submit" value="View Camera" name="start" />
+                {% endif %}
+                <br>
+         
+                {% if camera_on%}
+                    {% if rec %}
+                        
+                    {% else %}
+                        <br>
+                        {% if current_user.can(Permission.MODERATE) %}
+                            {% if lock_servos%}
+                                <p> Servos locked </p>
+            
+                            {% else %}
+                                <h3>Auto scan</h3>
+                                {% if varre%}
+                                    <input type="submit" value="Parar varredura" name="para_varredura" />
+                                {% else %}
+                                    <input type="submit" value="Varredura" name="varrer" />
+                                {% endif %}                        
+                        
+                                <br>
+
+                                <h3>Fine control</h3>
+                                    <h3>
+                                    <input type="submit" value='←' name="left"/>
+                                    <input type="submit" value='→' name="right"/>
+                                    <input type="submit" value='↑' name="up"/>
+                                    <input type="submit" value='↓' name="down"/>
+                                    </h3>
+                                </form>
+
+                                <h3>Specific position</h3>
+                                    <form method="post" action="{{ url_for('cam.servos') }}">
+                                        {{ wtf.quick_form(form) }}
+                                    </form>
+                            
+                            {% endif %}
+
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+
+        {% if current_user.can(Permission.ADMIN) %}
+            <form method="post" action="{{ url_for('cam.tasks') }}">
+                {% if lock_servos%}
+                    <input type="submit" value="Open servos" name="open_servos" />
+                {% else %}
+                    <input type="submit" value="Lock servos" name="lock_servos" />
+                {% endif %}      
+        {% endif %}
+        </form>
+            
+    
+    </div>
+
+</div>
+          
+
+{% endblock %}

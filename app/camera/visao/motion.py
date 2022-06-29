@@ -12,6 +12,7 @@ back_sub = cv2.createBackgroundSubtractorMOG2(history=50, varThreshold=25, detec
 kernel = np.ones((50,50),np.uint8)
 
 def motion(frame, w,h):
+    '''use cv to detect motion'''
 
     reduc = 2
     cinza = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)

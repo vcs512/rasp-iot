@@ -39,7 +39,7 @@ camera_on = False
 rec = False
 varre = False
 varrendo = False
-controle = False
+# controle = False
 lock_servos = False
 
 camera_device = 0
@@ -85,9 +85,11 @@ def gen_frames():
 
                 # servo sweeping
                 if varre:
-                    if varrendo:
+                    # if varrendo:
+                    if varrendo and th2.is_alive():
                         dec_motion = False
                         dec_face = False
+                        varrendo = False
                     else:
                         th2 = Thread (target = Servo_Control.Varredura_Servos, args= (10,20) )
                         th2.start()
@@ -115,11 +117,29 @@ def video_feed():
 
 
 
-# main camera view
+# full main camera view
 @cam.route('/camera', methods=['GET', 'POST'])
 @login_required
 def index():
-    global camera_on, dec_face, dec_motion, rec, varre, controle, lock_servos
+    global camera_on, dec_face, dec_motion, rec, varre, lock_servos
+    
+    return render_template('camera/camera.html', camera_on = camera_on, rec = rec)
+
+
+# computer vision view
+@cam.route('/camera_cv', methods=['GET'])
+@login_required
+def camera_cv():
+    global camera_on, dec_face, dec_motion, rec, varre
+    
+    return render_template('camera/cam-cv.html', camera_on = camera_on, rec = rec, dec_face = dec_face, dec_motion = dec_motion)
+
+
+# servo control view
+@cam.route('/servos', methods=['GET', 'POST'])
+@login_required
+def servos():
+    global camera_on, rec, varre, lock_servos
     
     form = Controle_servo()
     if form.validate_on_submit():
@@ -128,10 +148,10 @@ def index():
         
         Servo_Control.Controle_Manual(angulo_H=angulo_H,angulo_V=angulo_V,slp=1)
 
-        return redirect('/camera')
-
+        return redirect(url_for(cam.servos))
     
-    return render_template('camera/camera.html', camera_on = camera_on, dec_face = dec_face, dec_motion = dec_motion, rec = rec, form=form, varre=varre, controle=controle, lock_servos=lock_servos)
+    return render_template('camera/cam-servos.html', camera_on = camera_on, rec = rec, varre=varre, lock_servos=lock_servos, form=form)
+
 
 
 @cam.route('/cam_adm',methods=['POST','GET'])
@@ -141,7 +161,7 @@ def teste():
     return 'so adm'
 
 
-
+# function to record videos
 def cam_record():
     global rec, rec_frame, rec_status, camera, camera_on
     rec = True
@@ -154,7 +174,6 @@ def cam_record():
     while not camera.isOpened():
         print(f'Unable to read camera feed camera={camera}')
         if not rec:
-            # cv2.destroyAllWindows()
             return
 
     # get a valid frame to determine properties
@@ -166,13 +185,15 @@ def cam_record():
         if not rec:
             return
 
-    # Default resolutions of the frame are obtained.The default resolutions are system dependent.
-    # We convert the resolutions from float to integer.
+    # Default resolutions of the frame are obtained.
+    # The default resolutions are system dependent.
     frame_width = int(camera.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(camera.get(cv2.CAP_PROP_FRAME_HEIGHT))
     frame_rate = int(camera.get(cv2.CAP_PROP_FPS))
     print(f'frame_rate={frame_rate}, frame_width={frame_width}, frame_height={frame_height}')
-    # Define the codec and create VideoWriter object. The output is stored in 'outpy.avi' file.
+    
+    # Define the codec and create VideoWriter object. 
+    # The output is stored in 'output.avi' file.
     now = datetime.datetime.now()
     out = cv2.VideoWriter('videos/vid_{}.avi'.format(str(now).replace(":",'')), cv2.VideoWriter_fourcc('M','J','P','G'), 20, (frame_width, frame_height))
 
@@ -183,15 +204,20 @@ def cam_record():
         out.write(rec_frame)
         if not rec:
           break
-    # When everything is done, release the video capture and video write objects
+    
+    # release the video capture and video write objects
     if not camera_on:
         camera.release()
     out.release()
 
+
+
+# view to intermediate requests
+# return referrer url
 @cam.route('/cam_requests',methods=['POST','GET'])
 @login_required
 def tasks():
-    global camera_on,camera, capture, dec_motion, dec_face, rec, varre, controle, lock_servos
+    global camera_on,camera, capture, dec_motion, dec_face, rec, varre, lock_servos
     print('Entering cam_requests')
     if request.method == 'POST':
         
@@ -200,10 +226,10 @@ def tasks():
             capture = True
 
         # see controls panel
-        elif  request.form.get('stop_controls'):
-            controle = False
-        elif  request.form.get('controls'):
-            controle = True
+        # elif  request.form.get('stop_controls'):
+        #     controle = False
+        # elif  request.form.get('controls'):
+        #     controle = True
 
         # motion detection
         elif  request.form.get('no_motion'):
@@ -274,8 +300,12 @@ def tasks():
                 rec = False
                 time.sleep(1)
     print('Leaving cam_requests')
-    return redirect(url_for('.index'))
+    # return redirect(url_for('.index'))
+    return redirect(request.referrer)
 
+
+
+# about project
 @cam.route('/tabela',methods=['POST','GET'])
 def tabela():
     return render_template('camera/tabela.html')

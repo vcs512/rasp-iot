@@ -1,6 +1,7 @@
 import cv2
 
 def detect_face(frame, w,h):
+    '''use cv to detect faces'''
 
     # HAAR cascade - better accuracy
     # haar_face_cascade = cv2.CascadeClassifier('./saved_model/haarcascade_frontalface_alt.xml')

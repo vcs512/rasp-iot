@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block title %}VigiSEL{% endblock %}
+
+{% block page_content %}
+<head>
+    <style>
+    .row {
+    display: flex;
+    }
+
+    .column {
+    float: left;
+    }
+
+    .left {
+    width: 60%;
+    }
+
+    .right {
+    width: 40%;
+    }
+
+    .button-container form,
+    .button-container form div {
+        display: inline;
+    }
+    .button-container button {
+        display: inline;
+    }
+    </style>
+</head>
+
+
+<div class="button-container">
+    <form action="{{ url_for('cam.index') }}">
+        <button type="submit"> Full Camera </button>
+    </form>
+
+    <form action="{{ url_for('cam.servos') }}">
+        <button type="submit"> Control Servos </button>
+    </form>
+</div>
+            
+<div class="row">
+    
+    <div class="left">
+        {% if camera_on%}
+            <div class="box">
+                <image src="{{ url_for('cam.video_feed') }}"
+                        width="95%"
+                        height="auto">
+            </div>
+
+            <h4>Save archives</h4>
+            <form method="post" action="{{ url_for('cam.tasks') }}">
+                {% if rec %}
+                    <input type="submit" value="Stop Recording" name="rec_stop" />
+                {% else %}
+                    <input type="submit" value="Start Recording" name="rec_start" />
+                    
+                    <input type="submit" value="Capture" name="click"/>
+                {% endif %}
+            </form>
+        
+        {% else %}
+            <p> Click in "View Camera"</p>
+        {% endif %}
+    </div>
+
+
+    <div class="right">
+        <form method="post" action="{{ url_for('cam.tasks') }}">
+                {% if camera_on%}
+                    <input type="submit" value="Stop View" name="stop" />
+                {% else %}
+                    <input type="submit" value="View Camera" name="start" />
+                {% endif %}
+                <br>
+         
+                {% if camera_on%}
+                    {% if rec %}
+                    
+                    {% else %}
+                        <br>
+                        <h2>Computer Vision</h2>
+                        {% if dec_motion %}
+                            <input type="submit" value="Stop Motion" name="no_motion" />
+                        {% else %}
+                            <input type="submit" value="Motion" name="dec_motion" />
+                        {% endif %}
+            
+                        <br>        
+                        {% if dec_face %}
+                            <input type="submit" value="Stop Face" name="no_face" />
+                        {% else %}
+                            <input type="submit" value="Face" name="dec_face" />
+                        {% endif %}     
+                    {% endif %}         
+    
+                {% endif %}
+        </form>        
+
+    </div>
+
+</div>
+          
+    {% endblock %}
