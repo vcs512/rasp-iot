@@ -10,32 +10,29 @@
 <div class="page-header">
     <h1>User management</h1>
 </div>
-{% set moderate = True %}
-{% include '_comments.html' %}
-{% if pagination %}
-<div class="pagination">
-    {{ macros.pagination_widget(pagination, '.moderate') }}
-</div>
 
 <table id="mod_user" class="table table-striped">
     <thead>
        <td>e-mail</td>
+       <td> Account creation </td>
        <td>Last seen</td>
        <td>Role id</td>
     </thead>
     
     {% for row in rows %}
-       <tr>
+      <tr>
           <td>{{row.email}}</td>
+          <td>{{row.member_since}} </td>
           <td>{{row.last_seen}}</td>
-          <!-- <td> {{ row.role_id}} </td> -->
+
+         {% if row.role_id == 3 %}
+            <td>{{row.role_id}}</td>
+         {% else %}
           <td> <a href="{{ url_for('main.moderate_number', id=row.id) }}">{{ row.role_id}}</a></td>
-          <!-- <td> <a href="./moderate"></a> {{ row.role_id}}</td>	 -->
-       </tr>
+         {% endif %}
+      </tr>
     {% endfor %}
  </table>
 
 
-
-{% endif %}
 {% endblock %}

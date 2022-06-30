@@ -44,7 +44,6 @@ venv
 # Environment files
 .env
 .env-mysql
-/rasp-macbee.img
 /shots/
 /migrations/versions/
 /videos/

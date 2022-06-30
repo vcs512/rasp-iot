@@ -9,7 +9,7 @@ flask run --host 0.0.0.0
 
 # Banco de Dados
 
-## Para criar o banco de dados
+## Criar e atualizar o banco de dados
 
 ```bash
 flask db init
@@ -45,7 +45,7 @@ Procuram a tabela de Roles por nome e encontram sua chave primária.
 Adicionar um usuário com role de administrador:
 
 ```python
-u = User(email='john_admin@site.com', password='password_of_admin', name='John Admin', username='john_admin', confirmed=True, role=role_admin)
+u = User(email='vigisel@gmail.com', password='vigiSEL', name='vigiSEL Vigilancia', username='vigiSEL_ADMIN', confirmed=True, role=role_admin)
 ```
 
 A cada operação no banco de dados é necessário atualizar as alterações:
@@ -59,7 +59,7 @@ db.session.commit()
 
 Obter a referência para o objeto do usuário e alterar o campo desejado:
 ```python
-u = User.query.filter_by(username='john_doe').first()
+u = User.query.filter_by(email='vigiSEL@gmail.com').first()
 u.role = role_moderator
 db.session.commit()
 ```
@@ -69,7 +69,7 @@ db.session.commit()
 
 Procurar e apagar o usuário:
 ```python
-User.query.filter(User.username == 'john_doe').delete()
+User.query.filter(User.email == 'vigiSEL@gmail.com').delete()
 db.session.commit()
 ```
 

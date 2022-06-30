@@ -1,0 +1,13 @@
+[Unit]
+Description=vigiSEL
+
+[Service]
+User=sel
+Group=sel
+Environment="FLASK_APP=vigiSEL.py"
+WorkingDirectory=/home/pi/Code/rasp-iot
+ExecStart=/home/pi/Code/venv/bin/python /home/pi/Code/rasp-iot/vigiSEL.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
