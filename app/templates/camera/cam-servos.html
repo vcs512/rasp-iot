@@ -61,31 +61,39 @@
                 {% else %}
                     <input type="submit" value="View Camera" name="start" />
                 {% endif %}
-                <br>
+        </form>
+        <br>
          
                 {% if camera_on%}
-                    {% if rec %}
-                        
-                    {% else %}
-                        {% if current_user.can(Permission.MODERATE) %}
-                        
-                            {% if lock_servos%}
-                                <p> Servos locked </p>
+                    {% if current_user.can(Permission.MODERATE) %}
+                    
+                        {% if current_user.can(Permission.ADMIN) %}
+                            <form method="post" action="{{ url_for('cam.servo_tasks') }}">
+                                {% if lock_servos%}
+                                    <input type="submit" value="Open servos" name="open_servos" />
+                                {% else %}
+                                    <input type="submit" value="Lock servos" name="lock_servos" />
+                                {% endif %}      
+                            </form>
+                        {% endif %}
 
-                                Current servos position:
-                                <ul>
-                                    <li>Horizontal angle = {{ angulo_H }}</li>
-                                    <li>Vertical angle = {{ angulo_V }}</li>
-                                  </ul>
-            
-                            {% else %}
-                                <h3>Auto scan</h3>
+                        Current servos position:
+                        <ul>
+                            <li>Horizontal angle = {{ angulo_H }}</li>
+                            <li>Vertical angle = {{ angulo_V }}</li>
+                        </ul>
+
+                        {% if lock_servos%}
+                            <p> Servos locked </p>        
+                        {% else %}
+                            
+                            <h3>Auto scan</h3>
+                            <form method="post" action="{{ url_for('cam.servo_tasks') }}">
                                 {% if varre%}
                                     <input type="submit" value="Stop sweep" name="para_varredura" />
                                 {% else %}
                                     <input type="submit" value="Servo sweep" name="varrer" />
                                 {% endif %}                        
-                        
                                 <br>
 
                                 <h3>Fine control</h3>
@@ -95,37 +103,22 @@
                                     <input type="submit" value='↑' name="up"/>
                                     <input type="submit" value='↓' name="down"/>
                                     </h3>
+                            </form>
+
+                            <h3>Specific position</h3>
+
+                                <form method="post" action="{{ url_for('cam.servos') }}">
+                                    {{ wtf.quick_form(formH) }}
                                 </form>
+                                <form method="post" action="{{ url_for('cam.servos') }}">
+                                    {{ wtf.quick_form(formV) }}
+                                </form>
+                        
+                        {% endif %} <!-- lock servos -->
 
-                                <h3>Specific position</h3>
-                                    Current servos position:
-                                    <ul>
-                                        <li>Horizontal angle = {{ angulo_H }}</li>
-                                        <li>Vertical angle = {{ angulo_V }}</li>
-                                    </ul>
+                    {% endif %} <!-- MODERATE -->
 
-                                    <form method="post" action="{{ url_for('cam.servos') }}">
-                                        {{ wtf.quick_form(formH) }}
-                                        {{ wtf.quick_form(formV) }}
-                                    </form>
-                            
-                            {% endif %}
-
-                        {% endif %}
-                    {% endif %}
-                {% endif %}
-
-        {% if current_user.can(Permission.ADMIN) %}
-            <form method="post" action="{{ url_for('cam.tasks') }}">
-                {% if lock_servos%}
-                    <input type="submit" value="Open servos" name="open_servos" />
-                {% else %}
-                    <input type="submit" value="Lock servos" name="lock_servos" />
-                {% endif %}      
-        {% endif %}
-        </form>
-            
-    
+                {% endif %}  <!-- CAMERA_ON -->  
     </div>
 
 </div>

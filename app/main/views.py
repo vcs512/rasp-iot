@@ -28,6 +28,13 @@ def index():
     return render_template('index.html')
 
 
+# about project
+@main.route('/project_info',methods=['POST','GET'])
+def project_info():
+    return render_template('project_info.html')
+
+
+
 # user management
 @main.route('/moderate/', methods=['GET'])
 @login_required

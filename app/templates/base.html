@@ -28,7 +28,7 @@
             
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li><a href="{{ url_for('cam.tabela') }}">Project information</a></li>
+                    <li><a href="{{ url_for('main.project_info') }}">Project information</a></li>
                     {% if current_user.is_authenticated %}
                         <li><a href="{{ url_for('cam.index') }}">Camera</a></li>
                         <li><a href="{{ url_for('cam.files') }}">Saved videos</a></li>

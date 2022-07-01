@@ -28,8 +28,11 @@ from app.camera.servo import Servo_Control
 from .forms import Controle_servo, Servo_H, Servo_V
 
 # MQTT
-from app.mqtt_func.mqtt_func import client
 from app.mqtt_func import mqtt_func
+try:
+    from app.mqtt_func.mqtt_func import client
+except:
+    print('NO MQTT connection')
 
 # try GPIO
 gpio_ok = True
@@ -74,6 +77,7 @@ min_vizinhos = 2
 
 camera_device = 0
 
+
 def gen_frames():  
     '''generator: generate frame by frame from camera'''
 
@@ -100,30 +104,13 @@ def gen_frames():
             if success:
                 (w,h,_) = frame.shape
                 
-                # servo sweeping
-                if varre:
-                    try:
-                        if th2.is_alive():
-                            dec_motion = False
-                            dec_face = False
-                            pass
-                    except:
-                        Servo_Control.comeca_varredura()
-                        th2 = Thread (target = Servo_Control.Varredura_Servos, args= (10,20) )
-                        # th2 = Thread (target = Servo_Control.teste, args= (10,20) )
-                        th2.start()
-                        dec_motion = False
-                        dec_face = False
-                else:
-                    Servo_Control.para_varredura()
-
                 # modify frame with functions
                 if dec_motion:
                     frame, a, b = motion.motion(frame,w,h, back_sub, reduc=2, history=history, dk=dk)
                     
-                    
                 if dec_face:
                     frame = detect_face.detect_face(frame,w,h, scaleFactor=face_scale, minNeighbors=min_vizinhos)
+
 
                 # save picture
                 if capture:
@@ -158,7 +145,7 @@ def video_feed():
 @cam.route('/camera', methods=['GET', 'POST'])
 @login_required
 def index():
-    global camera_on, dec_face, dec_motion, rec, varre, lock_servos
+    global camera_on, rec
     
     return render_template('camera/camera.html', camera_on = camera_on, rec = rec)
 
@@ -192,7 +179,9 @@ def camera_cv():
     if formNEIG.validate_on_submit():
         min_vizinhos = formNEIG.min.data          
 
-    return render_template('camera/cam-cv.html', camera_on = camera_on, rec = rec, dec_face = dec_face, dec_motion = dec_motion, formHIST=formHIST, formdk=formdk, formLIM=formLIM, formSCALE=formSCALE, formNEIG=formNEIG)
+    return render_template('camera/cam-cv.html', camera_on = camera_on, rec = rec,\
+        dec_face = dec_face, formSCALE=formSCALE, formNEIG=formNEIG,\
+        dec_motion = dec_motion, formHIST=formHIST, formdk=formdk, formLIM=formLIM)
 
 
 # servo control view
@@ -201,52 +190,35 @@ def camera_cv():
 def servos():
     global camera_on, rec, varre, lock_servos
     
+    angulo_H = 'not found'
+    angulo_V = 'not found'
+
     if gpio_ok:
         try:
             angulo_H = Servo_Control.Angulo_Atual_H()
             angulo_V = Servo_Control.Angulo_Atual_V()
         except:
-            angulo_H = -180
-            angulo_V = -180    
-    else:
-        angulo_H = -180
-        angulo_V = -180
-
-    # form = Controle_servo()
-
-    # if request.method == 'POST':
-    #     if form.submit_H.data == True:
-    #         angulo_H = form.angulo_H.data
-    #         print('H = ', angulo_H)
-    #         Servo_Control.Controle_Manual_H(angulo_H=angulo_H,slp=1)
-        
-    #     elif form.submit_V.data == True:
-    #         angulo_V = form.angulo_V.data
-    #         Servo_Control.Controle_Manual_V(angulo_V=angulo_V,slp=1)
-
-    #     else:
-    #         angulo_H = form.angulo_H.data
-    #         angulo_V = form.angulo_V.data
-            
-    #         Servo_Control.Controle_Manual(angulo_H=angulo_H,angulo_V=angulo_V,slp=1)
-
-    #     return redirect(url_for(cam.servos))
+            pass
 
     formH = Servo_H()
     formV = Servo_V()
     
-    if formH.validate_on_submit():
-        angulo_H = formH.angulo_H.data
-        Servo_Control.Controle_Manual_H(angulo_H=angulo_H,slp=1)
-        angulo_V = Servo_Control.Angulo_Atual_V()
+    if not lock_servos:
+        if formH.validate_on_submit():
+            angulo_H = formH.angulo_H.data
+            Servo_Control.Controle_Manual_H(angulo_H=angulo_H,slp=1)
+            angulo_V = Servo_Control.Angulo_Atual_V()
 
-    if formV.validate_on_submit():
-        angulo_V = formV.angulo_V.data
-        Servo_Control.Controle_Manual_V(angulo_V=angulo_V,slp=1)
-        angulo_H = Servo_Control.Angulo_Atual_H()
+        if formV.validate_on_submit():
+            angulo_V = formV.angulo_V.data
+            Servo_Control.Controle_Manual_V(angulo_V=angulo_V,slp=1)
+            angulo_H = Servo_Control.Angulo_Atual_H()
 
     
-    return render_template('camera/cam-servos.html', camera_on = camera_on, rec = rec, varre=varre, lock_servos=lock_servos, angulo_H=angulo_H, angulo_V=angulo_V, formH=formH, formV=formV)
+    return render_template('camera/cam-servos.html', camera_on = camera_on, rec = rec, \
+                            varre=varre, lock_servos=lock_servos, \
+                            angulo_H=angulo_H, angulo_V=angulo_V, \
+                            formH=formH, formV=formV)
 
 
 
@@ -259,7 +231,7 @@ def teste():
 
 # function to record videos
 def cam_record():
-    global rec, rec_frame, rec_status, camera, camera_on
+    global rec, rec_frame, rec_status, camera, camera_on, camera_device
     rec = True
 
     print('Openning VideoCapture inside the thread')
@@ -281,14 +253,12 @@ def cam_record():
         if not rec:
             return
 
-    # Default resolutions of the frame are obtained.
-    # The default resolutions are system dependent.
+    # resolutions of the frame are obtained.
     frame_width = int(camera.get(cv2.CAP_PROP_FRAME_WIDTH))
     frame_height = int(camera.get(cv2.CAP_PROP_FRAME_HEIGHT))
     frame_rate = int(camera.get(cv2.CAP_PROP_FPS))
     print(f'frame_rate={frame_rate}, frame_width={frame_width}, frame_height={frame_height}')
     
-    # Define the codec and create VideoWriter object. 
     # The output is stored in 'output.avi' file.
     now = datetime.datetime.now()
     out = cv2.VideoWriter('videos/vid_{}.avi'.format(str(now).replace(":",'')), cv2.VideoWriter_fourcc('M','J','P','G'), 20, (frame_width, frame_height))
@@ -308,12 +278,12 @@ def cam_record():
 
 
 
-# view to intermediate requests
+# view to intermediate camera requests
 # return referrer url
 @cam.route('/cam_requests',methods=['POST','GET'])
 @login_required
 def tasks():
-    global camera_on,camera, capture, dec_motion, dec_face, rec, varre, lock_servos, follow_motion, follow_face
+    global camera_on, camera, camera_device, capture, dec_motion, dec_face, rec, varre, lock_servos, follow_motion, follow_face
     global a,b
     print('Entering cam_requests')
     if request.method == 'POST':
@@ -342,46 +312,18 @@ def tasks():
         elif  request.form.get('no_face'):
             dec_face = False
         elif  request.form.get('dec_face'):
-            dec_face = True
-
-
-
-        # arrow fine servo
-        elif  request.form.get('left'):
-            angulo_H = Servo_Control.Angulo_Atual_H()
-            Servo_Control.Controle_Manual_H(angulo_H-10,slp=1)
-        elif  request.form.get('right'):
-            angulo_H = Servo_Control.Angulo_Atual_H()
-            Servo_Control.Controle_Manual_H(angulo_H+10,slp=1)
-
-        elif  request.form.get('down'):
-            angulo_V = Servo_Control.Angulo_Atual_V()
-            Servo_Control.Controle_Manual_V(angulo_V+10,slp=1)
-        elif  request.form.get('up'):
-            angulo_V = Servo_Control.Angulo_Atual_V()
-            Servo_Control.Controle_Manual_V(angulo_V-10,slp=1)
-
-
-        # servo sweep
-        elif  request.form.get('para_varredura'):
-            varre = False
-        elif  request.form.get('varrer'):
-            varre = True
-
-        # lock servos
-        elif  request.form.get('open_servos'):
-            lock_servos = False
-        elif  request.form.get('lock_servos'):
-            lock_servos = True
-        
-            
+            dec_face = True         
         
         # see camera image
         elif  request.form.get('start'):
             if not camera_on and not rec:
                 camera = cv2.VideoCapture(camera_device)
-                mqtt_func.publish(client, 'abriu camera')
+                try:
+                    mqtt_func.publish(client, 'Opened camera in {}'.format(datetime.datetime.now()))
+                except:
+                    print('NO MSQTT connection')
             camera_on = True
+            
         elif  request.form.get('stop'):
             if camera_on and not rec:
                 camera.release()
@@ -398,22 +340,67 @@ def tasks():
             if rec:
                 rec = False
                 time.sleep(1)
+
     print('Leaving cam_requests')
-    # return redirect(url_for('.index'))
     return redirect(request.referrer)
 
 
+# view to intermediate servo requests
+# return referrer url
+@cam.route('/servo_requests',methods=['POST','GET'])
+@login_required
+def servo_tasks():
+    global varre, lock_servos
 
-# about project
-@cam.route('/tabela',methods=['POST','GET'])
-def tabela():
-    return render_template('camera/tabela.html')
+    print('Entering servo_requests')
+    if request.method == 'POST':
+
+        # arrow fine servo
+        if  request.form.get('left'):
+            angulo_H = Servo_Control.Angulo_Atual_H()
+            Servo_Control.Controle_Manual_H( np.max(angulo_H-10, Servo_Control.min_H),slp=1)
+        elif  request.form.get('right'):
+            angulo_H = Servo_Control.Angulo_Atual_H()
+            Servo_Control.Controle_Manual_H( np.min(angulo_H+10, Servo_Control.max_H ),slp=1)
+
+        elif  request.form.get('down'):
+            angulo_V = Servo_Control.Angulo_Atual_V()
+            Servo_Control.Controle_Manual_V( np.min(angulo_V+10, Servo_Control.max_V),slp=1)
+        elif  request.form.get('up'):
+            angulo_V = Servo_Control.Angulo_Atual_V()
+            Servo_Control.Controle_Manual_V( np.max(angulo_V-10, Servo_Control.min_V),slp=1)
 
 
+        # servo sweep
+        elif  request.form.get('varrer'):
+            varre = True
+            try:
+                if th2.is_alive():
+                    pass
+            except:
+                Servo_Control.comeca_varredura()
+                th2 = Thread (target = Servo_Control.Varredura_Servos, args= (10,20) )
+                # th2 = Thread (target = Servo_Control.teste, args= (10,20) )
+                th2.start()
+                dec_motion = False
+                dec_face = False
+        
+        elif  request.form.get('para_varredura'):
+            varre = False
+            Servo_Control.para_varredura()
+            
+
+        # lock servos
+        elif  request.form.get('open_servos'):
+            lock_servos = False
+        elif  request.form.get('lock_servos'):
+            lock_servos = True
+            
+    print('Leaving servo_requests')
+    return redirect(request.referrer)
 
 
-
-
+# view to show archives
 @cam.route('/files',methods=['POST','GET'])
 @login_required
 def files():
@@ -427,6 +414,7 @@ def files():
         d = []
     return render_template('camera/files.html', data = d)
 
+# view to download archives
 @cam.route('/file_action',methods=['POST'])
 @login_required
 def file_action():
@@ -438,6 +426,7 @@ def file_action():
             return send_file('../videos/' + fn)
         except Exception as e:
             print(str(e))
+
     if request.form.get('erase'):
         fn = 'videos/vid_{} {}.avi'.format(request.form.get('date'), request.form.get('time'))
         print('erase')

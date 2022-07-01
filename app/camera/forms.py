@@ -37,17 +37,6 @@ class Servo_V(FlaskForm):
     submit_V = SubmitField("Submit vertical")
 
 
-class Servo_adjust(FlaskForm):
-    '''adjust servos with sliders'''
-    
-    angulo_H = IntegerRangeField('Horizontal angle', validators=[NumberRange(min=Servo_Control.min_H, max=Servo_Control.max_H, message='Enter range between {} and {}'.format(Servo_Control.min_H, Servo_Control.max_H))])
-    # submit_H = SubmitField("Submit horizontal")
-
-    angulo_V = IntegerRangeField('Vertical angle', validators=[NumberRange(min=Servo_Control.min_V, max=Servo_Control.max_V, message='Enter range between {} and {}'.format(Servo_Control.min_V, Servo_Control.max_V))])
-    # submit_V = SubmitField("Submit vertical")
-
-    submit = SubmitField("Submit Horizontal and Vertical")
-
 class cv_hist(FlaskForm):
     '''adjust number of frames for history in motion detection'''
 
