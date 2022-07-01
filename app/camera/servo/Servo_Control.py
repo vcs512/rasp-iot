@@ -1,5 +1,5 @@
-# import RPi.GPIO as GPIO
-# import pigpio #Run this command everytime: sudo apt-get install python3-pigpio; sudo pigpiod
+import RPi.GPIO as GPIO
+import pigpio #Run this command everytime: sudo apt-get install python3-pigpio; sudo pigpiod
 import time
 import math
 from flask import flash
@@ -31,198 +31,198 @@ def comeca_varredura():
     varre = True
 
 
-# def teste(x,passo=20): # 'x' equivale a tempo [em segundos] de varredura e 'passo' a quantidade de passos dentro do tempo 'x'
-#     global varre
+def teste(x,passo=20): # 'x' equivale a tempo [em segundos] de varredura e 'passo' a quantidade de passos dentro do tempo 'x'
+    global varre
 
-#     meio_passo = passo//2
+    meio_passo = passo//2
 
-#     while True:
-#         for i in range(min_H, max_H, max_H//meio_passo):
-#             if not varre:
-#                 return
-#             print(i)
+    while True:
+        for i in range(min_H, max_H, max_H//meio_passo):
+            if not varre:
+                return
+            print(i)
         
-#         for i in range(max_H, min_H, -max_H//meio_passo):
-#             if not varre:
-#                 return
-#             print(i)
+        for i in range(max_H, min_H, -max_H//meio_passo):
+            if not varre:
+                return
+            print(i)
 
-# # more info at http://abyz.me.uk/rpi/pigpio/python.html#set_servo_pulsewidth
+# more info at http://abyz.me.uk/rpi/pigpio/python.html#set_servo_pulsewidth
 
-# pwm = pigpio.pi() #Inicia biblioteca
+pwm = pigpio.pi() #Inicia biblioteca
 
-# #Define os Servos com Output
-# pwm.set_mode(servo_H, pigpio.OUTPUT)
-# pwm.set_PWM_frequency( servo_H, 50 )
-# pwm.set_mode(servo_V, pigpio.OUTPUT)
-# pwm.set_PWM_frequency( servo_V, 50 )
-
-
-# def toggle_servo(X):#1-Servo ON; 0 - Servo OFF
-#     if (X):
-#         pwm.set_mode(servo_H, pigpio.OUTPUT)
-#         pwm.set_PWM_frequency( servo_H, 50 )
-#         pwm.set_mode(servo_V, pigpio.OUTPUT)
-#         pwm.set_PWM_frequency( servo_V, 50 )
-#         flash('Servos ON')
-#     else:
-#         pwm.set_PWM_dutycycle(servo_H, 0)
-#         pwm.set_PWM_frequency(servo_H, 0)
-#         pwm.set_PWM_dutycycle(servo_V, 0)
-#         pwm.set_PWM_frequency(servo_V, 0)
-#         flash('Servos OFF')
-
-# def func(x): #Retorna o valor em segundos [para o t_{on} do PWM] da rotacao em graus desejada
-#     return (2000-1000)/(0-(-180))*x+1500 #Funcao de primeiro grau: P0=(-90,1000),P1=(0,1500) e P2=(2000,90)
-
-# def inv_func(y): #Retorna o valor em graus de um dutycycle em segundos
-#     return (y-1500.0)*180.0/1000.0 
+#Define os Servos com Output
+pwm.set_mode(servo_H, pigpio.OUTPUT)
+pwm.set_PWM_frequency( servo_H, 50 )
+pwm.set_mode(servo_V, pigpio.OUTPUT)
+pwm.set_PWM_frequency( servo_V, 50 )
 
 
-# def checa_angulo(angulo_V=0,angulo_H=0):#Retorna 0 se estiver errado e flash o periodo correto dos angulos; Retorna 1 se correto;
-#     #me pergunto o que aconteceria com o flash() se enviasse os dois angulos errados
-#     if (float(angulo_H)<min_H or float(angulo_H)>max_H) or (float(angulo_V)<min_V or float(angulo_V)>max_V):
+def toggle_servo(X):#1-Servo ON; 0 - Servo OFF
+    if (X):
+        pwm.set_mode(servo_H, pigpio.OUTPUT)
+        pwm.set_PWM_frequency( servo_H, 50 )
+        pwm.set_mode(servo_V, pigpio.OUTPUT)
+        pwm.set_PWM_frequency( servo_V, 50 )
+        flash('Servos ON')
+    else:
+        pwm.set_PWM_dutycycle(servo_H, 0)
+        pwm.set_PWM_frequency(servo_H, 0)
+        pwm.set_PWM_dutycycle(servo_V, 0)
+        pwm.set_PWM_frequency(servo_V, 0)
+        flash('Servos OFF')
+
+def func(x): #Retorna o valor em segundos [para o t_{on} do PWM] da rotacao em graus desejada
+    return (2000-1000)/(0-(-180))*x+1500 #Funcao de primeiro grau: P0=(-90,1000),P1=(0,1500) e P2=(2000,90)
+
+def inv_func(y): #Retorna o valor em graus de um dutycycle em segundos
+    return (y-1500.0)*180.0/1000.0 
+
+
+def checa_angulo(angulo_V=0,angulo_H=0):#Retorna 0 se estiver errado e flash o periodo correto dos angulos; Retorna 1 se correto;
+    #me pergunto o que aconteceria com o flash() se enviasse os dois angulos errados
+    if (float(angulo_H)<min_H or float(angulo_H)>max_H) or (float(angulo_V)<min_V or float(angulo_V)>max_V):
         
-#         if (float(angulo_H)<min_H or float(angulo_H)>max_H):
-#             if (float(angulo_H)<min_H):
-#                 pwm.set_servo_pulsewidth( servo_H, func(min_H));
-#             elif (float(angulo_H)>max_H):
-#                 pwm.set_servo_pulsewidth( servo_H, func(max_H));
+        if (float(angulo_H)<min_H or float(angulo_H)>max_H):
+            if (float(angulo_H)<min_H):
+                pwm.set_servo_pulsewidth( servo_H, func(min_H));
+            elif (float(angulo_H)>max_H):
+                pwm.set_servo_pulsewidth( servo_H, func(max_H));
         
-#         message="ERROR: Angulo Horizontal fora de faixa ["+str(min_H)+","+str(max_H)+"]"
-#         flash(message)
+        message="ERROR: Angulo Horizontal fora de faixa ["+str(min_H)+","+str(max_H)+"]"
+        flash(message)
         
-#         if (float(angulo_V)<min_V or float(angulo_V)>max_V):
-#             if (float(angulo_V)<min_V):
-#                 pwm.set_servo_pulsewidth( servo_V, func(min_V));
-#             elif (float(angulo_V)>max_V):
-#                 pwm.set_servo_pulsewidth( servo_V, func(max_V));
+        if (float(angulo_V)<min_V or float(angulo_V)>max_V):
+            if (float(angulo_V)<min_V):
+                pwm.set_servo_pulsewidth( servo_V, func(min_V));
+            elif (float(angulo_V)>max_V):
+                pwm.set_servo_pulsewidth( servo_V, func(max_V));
         
-#         message="ERROR: Angulo Vertical fora de faixa ["+str(min_V)+","+str(max_V)+"]"
-#         flash(message)
-# #https://stackoverflow.com/questions/71153840/how-to-flash-message-with-variables-in-flask
+        message="ERROR: Angulo Vertical fora de faixa ["+str(min_V)+","+str(max_V)+"]"
+        flash(message)
+#https://stackoverflow.com/questions/71153840/how-to-flash-message-with-variables-in-flask
         
-#         return 0
+        return 0
         
-#     else:
-#         return 1
+    else:
+        return 1
     
     
 
-# def Controle_Manual(angulo_H=0,angulo_V=0,slp=1): # 'angulo_H' [em graus] e 'angulo_V' [em graus] define o angulo de rotação e 'slp' o tempo entre comandos [em segundos]
+def Controle_Manual(angulo_H=0,angulo_V=0,slp=1): # 'angulo_H' [em graus] e 'angulo_V' [em graus] define o angulo de rotação e 'slp' o tempo entre comandos [em segundos]
        
 
-#     if(checa_angulo(angulo_H,angulo_V)):
-#        pwm.set_servo_pulsewidth( servo_H, func(float(angulo_H))) ;
-#        pwm.set_servo_pulsewidth( servo_V, func(float(angulo_V))) ;
-#        time.sleep( slp )
+    if(checa_angulo(angulo_H,angulo_V)):
+       pwm.set_servo_pulsewidth( servo_H, func(float(angulo_H))) ;
+       pwm.set_servo_pulsewidth( servo_V, func(float(angulo_V))) ;
+       time.sleep( slp )
 
-#        #return func(float(angulo_H)), func(float(angulo_V)) 
+       #return func(float(angulo_H)), func(float(angulo_V)) 
            
 
-# def Controle_Manual_H(angulo_H,slp=1):
-#     ''' 'angulo_H' [em graus] define o angulo de rotação e 'slp' o tempo entre comandos [em segundos]'''
+def Controle_Manual_H(angulo_H,slp=1):
+    ''' 'angulo_H' [em graus] define o angulo de rotação e 'slp' o tempo entre comandos [em segundos]'''
        
-#     if(checa_angulo(angulo_H)):
-#        pwm.set_servo_pulsewidth( servo_H, func(float(angulo_H))) ;
-#        time.sleep( slp )
+    if(checa_angulo(angulo_H)):
+       pwm.set_servo_pulsewidth( servo_H, func(float(angulo_H))) ;
+       time.sleep( slp )
 
-#        #return func(float(angulo_H))
+       #return func(float(angulo_H))
 
-# def Controle_Manual_V(angulo_V,slp=1): # 'angulo_V' [em graus] define o angulo de rotação e 'slp' o tempo entre comandos [em segundos]
+def Controle_Manual_V(angulo_V,slp=1): # 'angulo_V' [em graus] define o angulo de rotação e 'slp' o tempo entre comandos [em segundos]
        
-#     if(checa_angulo(0,angulo_V)):
-#        pwm.set_servo_pulsewidth( servo_V, func(float(angulo_V))) ;
-#        time.sleep( slp )
+    if(checa_angulo(0,angulo_V)):
+       pwm.set_servo_pulsewidth( servo_V, func(float(angulo_V))) ;
+       time.sleep( slp )
 
-#        #return func(float(angulo_V))
+       #return func(float(angulo_V))
            
 
-# def Varredura_Servos(x,passo=20): # 'x' equivale a tempo [em segundos] de varredura e 'passo' a quantidade de passos dentro do tempo 'x'
+def Varredura_Servos(x,passo=20): # 'x' equivale a tempo [em segundos] de varredura e 'passo' a quantidade de passos dentro do tempo 'x'
 
-#     global varre
-#     meio_passo = passo//2
+    global varre
+    meio_passo = passo//2
 
-#     while True:
-#         for i in range(min_H, max_H, max_H//meio_passo):
-#             if not varre:
-#                 return
-#             Controle_Manual_H(i, x//meio_passo)
+    while True:
+        for i in range(min_H, max_H, max_H//meio_passo):
+            if not varre:
+                return
+            Controle_Manual_H(i, x//meio_passo)
         
-#         for i in range(max_H, min_H, -max_H//meio_passo):
-#             if not varre:
-#                 return
-#             Controle_Manual_H(i, x//meio_passo)
+        for i in range(max_H, min_H, -max_H//meio_passo):
+            if not varre:
+                return
+            Controle_Manual_H(i, x//meio_passo)
 
 
-# #https://abyz.me.uk/rpi/pigpio/pdif2.html
+#https://abyz.me.uk/rpi/pigpio/pdif2.html
 
-# def Angulo_Atual_V(): #Retorna o angulo atual do servo motor vertical
-#     return inv_func(pwm.get_servo_pulsewidth(servo_V))
+def Angulo_Atual_V(): #Retorna o angulo atual do servo motor vertical
+    return inv_func(pwm.get_servo_pulsewidth(servo_V))
 
-# def Angulo_Atual_H(): #Retorna o angulo altual do servo motor horizontal
-#     return inv_func(pwm.get_servo_pulsewidth(servo_H))
+def Angulo_Atual_H(): #Retorna o angulo altual do servo motor horizontal
+    return inv_func(pwm.get_servo_pulsewidth(servo_H))
         
-# def Center_Object_H(pos_H,Resolucao_H=640): # 'pos_H' [em pixel] e 'pos_V' [em pixel] definem o local do Objeto no plano da câmera e 'Resolucao_H' [em pixel] e 'Resolucao_V' [em pixel] a resolução da mesma
+def Center_Object_H(pos_H,Resolucao_H=640): # 'pos_H' [em pixel] e 'pos_V' [em pixel] definem o local do Objeto no plano da câmera e 'Resolucao_H' [em pixel] e 'Resolucao_V' [em pixel] a resolução da mesma
 
-#     Angulo_Atual=inv_func(pwm.get_servo_pulsewidth(servo_H)) 
-#     if pos_H>=Resolucao_H/2.0:
-#         Sinal=1.0
-#     else:
-#         Sinal=-1.0
-#     angulo_H=Angulo_Atual+Sinal*math.degrees(math.atan((math.fabs(pos_H-Resolucao_H/2.0)*Sx)/f))
+    Angulo_Atual=inv_func(pwm.get_servo_pulsewidth(servo_H)) 
+    if pos_H>=Resolucao_H/2.0:
+        Sinal=1.0
+    else:
+        Sinal=-1.0
+    angulo_H=Angulo_Atual+Sinal*math.degrees(math.atan((math.fabs(pos_H-Resolucao_H/2.0)*Sx)/f))
     
-#     Controle_Manual_H(angulo_H,1)
+    Controle_Manual_H(angulo_H,1)
 
     
-# def Center_Object_V(pos_V,Resolucao_V=480): # 'pos_H' [em pixel] e 'pos_V' [em pixel] definem o local do Objeto no plano da câmera e 'Resolucao_H' [em pixel] e 'Resolucao_V' [em pixel] a resolução da mesma
+def Center_Object_V(pos_V,Resolucao_V=480): # 'pos_H' [em pixel] e 'pos_V' [em pixel] definem o local do Objeto no plano da câmera e 'Resolucao_H' [em pixel] e 'Resolucao_V' [em pixel] a resolução da mesma
 
-#     Angulo_Atual=inv_func(pwm.get_servo_pulsewidth(servo_V)) 
-#     if pos_V>=Resolucao_V/2.0:
-#         Sinal=1.0
-#     else:
-#         Sinal=-1.0
+    Angulo_Atual=inv_func(pwm.get_servo_pulsewidth(servo_V)) 
+    if pos_V>=Resolucao_V/2.0:
+        Sinal=1.0
+    else:
+        Sinal=-1.0
 
-#     angulo_V=Angulo_Atual+Sinal*math.degrees(math.atan((math.fabs(pos_V-Resolucao_V/2.0)*Sx)/f))
+    angulo_V=Angulo_Atual+Sinal*math.degrees(math.atan((math.fabs(pos_V-Resolucao_V/2.0)*Sx)/f))
     
-#     Controle_Manual_V(angulo_V,1)
+    Controle_Manual_V(angulo_V,1)
     
     
-# def Center_Object(pos_H,pos_V,Resolucao_H=3280,Resolucao_V=2464):
-#     # 'pos_H' [em pixel] e 'pos_V' [em pixel] definem o local do Objeto no plano da câmera e 'Resolucao_H' [em pixel] e 'Resolucao_V' [em pixel] a resolução da mesma
+def Center_Object(pos_H,pos_V,Resolucao_H=3280,Resolucao_V=2464):
+    # 'pos_H' [em pixel] e 'pos_V' [em pixel] definem o local do Objeto no plano da câmera e 'Resolucao_H' [em pixel] e 'Resolucao_V' [em pixel] a resolução da mesma
 
-#     Angulo_Atual_H=inv_func(pwm.get_servo_pulsewidth(servo_H)) 
-#     Angulo_Atual_V=inv_func(pwm.get_servo_pulsewidth(servo_V)) 
+    Angulo_Atual_H=inv_func(pwm.get_servo_pulsewidth(servo_H)) 
+    Angulo_Atual_V=inv_func(pwm.get_servo_pulsewidth(servo_V)) 
     
-#     Sinal_V=0.0
-#     Sinal_H=0.0
-#     if Angulo_Atual_H >= 0:
-#         if pos_H>=Resolucao_H/2.0:
-#             Sinal_H=1.0
-#         else:
-#             Sinal_H=-1.0
-#     elif Angulo_Atual_H < 0:
-#         if pos_H>=Resolucao_H/2.0:
-#             Sinal_H=-1.0
-#         else:
-#             Sinal_H=1.0
-#     if Angulo_Atual_V < 0:
-#         if pos_V>=Resolucao_V/2.0:
-#             Sinal_V=-1.0
-#         else:
-#             Sinal_V=1.0 
+    Sinal_V=0.0
+    Sinal_H=0.0
+    if Angulo_Atual_H >= 0:
+        if pos_H>=Resolucao_H/2.0:
+            Sinal_H=1.0
+        else:
+            Sinal_H=-1.0
+    elif Angulo_Atual_H < 0:
+        if pos_H>=Resolucao_H/2.0:
+            Sinal_H=-1.0
+        else:
+            Sinal_H=1.0
+    if Angulo_Atual_V < 0:
+        if pos_V>=Resolucao_V/2.0:
+            Sinal_V=-1.0
+        else:
+            Sinal_V=1.0 
 
-#     elif Angulo_Atual_V < 0:
+    elif Angulo_Atual_V < 0:
 
-#         if pos_V>=Resolucao_V/2.0:
-#             Sinal_V=1.0
-#         else:
-#             Sinal_V=-1.0      
+        if pos_V>=Resolucao_V/2.0:
+            Sinal_V=1.0
+        else:
+            Sinal_V=-1.0      
 
-#     angulo_H=Angulo_Atual_H+1.0*Sinal_H*math.degrees(math.atan((1.0*math.fabs(pos_H-Resolucao_H/2.0)*Sx)/f))
-#     angulo_V=Angulo_Atual_V+1.0*Sinal_V*math.degrees(math.atan((1.0*math.fabs(pos_V-Resolucao_V/2.0)*Sx)/f))
+    angulo_H=Angulo_Atual_H+1.0*Sinal_H*math.degrees(math.atan((1.0*math.fabs(pos_H-Resolucao_H/2.0)*Sx)/f))
+    angulo_V=Angulo_Atual_V+1.0*Sinal_V*math.degrees(math.atan((1.0*math.fabs(pos_V-Resolucao_V/2.0)*Sx)/f))
     
-#     Controle_Manual(angulo_H,angulo_V,1)
+    Controle_Manual(angulo_H,angulo_V,1)
         
-# #while True:
-# #    Controle_Manual_V(input("Rotacao_V: "),0.5)
+#while True:
+#    Controle_Manual_V(input("Rotacao_V: "),0.5)
