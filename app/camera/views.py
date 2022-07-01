@@ -31,41 +31,6 @@ from .forms import Controle_servo, Servo_H, Servo_V
 from app.mqtt_func.mqtt_func import client
 from app.mqtt_func import mqtt_func
 
-
-import trace
-import threading
-class KThread(threading.Thread):
-  def __init__(self, *args, **keywords):
-    threading.Thread.__init__(self, *args, **keywords)
-    self.killed = False
-  def start(self):
-    self.__run_backup = self.run
-    self.run = self.__run     
-    threading.Thread.start(self)
-  def __run(self):
-    sys.settrace(self.globaltrace)
-    self.__run_backup()
-    self.run = self.__run_backup
-  def globaltrace(self, frame, why, arg):
-    if why == 'call':
-      return self.localtrace
-    else:
-      return None
-  def localtrace(self, frame, why, arg):
-    if self.killed:
-      if why == 'line':
-        raise SystemExit()
-    return self.localtrace
-  def kill(self):
-    self.killed = True
-def exfu():
-  print('The function begins')
-  for i in range(1,100):
-    print(i)
-    time.sleep(0.2)
-  print('The function ends') 
-
-
 # try GPIO
 gpio_ok = True
 
@@ -96,7 +61,6 @@ varrendo = False
 lock_servos = False
 follow_motion = False
 follow_face = False
-# controle = False
 
 dec_motion = False
 dec_face = False
@@ -136,6 +100,23 @@ def gen_frames():
             if success:
                 (w,h,_) = frame.shape
                 
+                # servo sweeping
+                if varre:
+                    try:
+                        if th2.is_alive():
+                            dec_motion = False
+                            dec_face = False
+                            pass
+                    except:
+                        Servo_Control.comeca_varredura()
+                        th2 = Thread (target = Servo_Control.Varredura_Servos, args= (10,20) )
+                        # th2 = Thread (target = Servo_Control.teste, args= (10,20) )
+                        th2.start()
+                        dec_motion = False
+                        dec_face = False
+                else:
+                    Servo_Control.para_varredura()
+
                 # modify frame with functions
                 if dec_motion:
                     frame, a, b = motion.motion(frame,w,h, back_sub, reduc=2, history=history, dk=dk)
@@ -151,35 +132,7 @@ def gen_frames():
                     p = os.path.sep.join(['shots', "shot_{}.png".format(str(now).replace(":",''))])
                     cv2.imwrite(p, frame)
 
-                # servo sweeping
-                if varre:
-                    # if varrendo:
-                    # if varrendo:
-                    #     try:
-                    #         if th2.is_alive():
-                    #             varrendo = False
-                    #     except:
-                    #         dec_motion = False
-                    #         dec_face = False
-                    # else:
-                    try:
-                        if th2.is_alive():
-                            pass
-                    except:
-                        # th2 = KThread(target=Servo_Control.Varredura_Servos, args= (10,20))
-                        th2 = Thread (target = Servo_Control.Varredura_Servos, args= (10,20) )
-                        th2.start()
-                        # varrendo = True
-                        dec_motion = False
-                        dec_face = False
-                else:
-                    try:
-                        # th2.kill()
-                        th2.stop()
-                    except:
-                        pass
-
-                # return frame                    
+                # try to return frame                    
                 try:
                     _, buffer = cv2.imencode('.jpg', frame)
                     frame = buffer.tobytes()
@@ -369,12 +322,6 @@ def tasks():
         if request.form.get('click'):
             capture = True
 
-        # see controls panel
-        # elif  request.form.get('stop_controls'):
-        #     controle = False
-        # elif  request.form.get('controls'):
-        #     controle = True
-
         # motion detection
         elif  request.form.get('no_motion'):
             dec_motion = False
@@ -382,10 +329,7 @@ def tasks():
             dec_motion = True
 
         elif  request.form.get('follow_motion'):
-            # follow_motion = True
-            print('a = ', a)
             pos_H = (a+b)[0]//2
-            print('pos_H = ', pos_H)
             pos_V = (a+b)[1]//2
             Servo_Control.Center_Object(pos_H,pos_V,Resolucao_H=640,Resolucao_V=480)
 
@@ -405,11 +349,9 @@ def tasks():
         # arrow fine servo
         elif  request.form.get('left'):
             angulo_H = Servo_Control.Angulo_Atual_H()
-            # print('angulo = ', angulo_H)
             Servo_Control.Controle_Manual_H(angulo_H-10,slp=1)
         elif  request.form.get('right'):
             angulo_H = Servo_Control.Angulo_Atual_H()
-            # print('angulo = ', angulo_H)
             Servo_Control.Controle_Manual_H(angulo_H+10,slp=1)
 
         elif  request.form.get('down'):

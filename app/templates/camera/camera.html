@@ -13,34 +13,17 @@
         margin-right: auto;
         width: 70%;
     }
-    
-    .button-container form,
-    .button-container form div {
-        display: inline;
-    }
-    .button-container button {
-        display: inline;
-    }
     </style>
 </head>
-
-
-<div class="button-container">
-    <form action="{{ url_for('cam.camera_cv') }}">
-        <button type="submit"> Computer Vision </button>
-    </form>
-
-    <form action="{{ url_for('cam.servos') }}">
-        <button type="submit"> Control Servos </button>
-    </form>
-</div>
 
 
 <form method="post" action="{{ url_for('cam.tasks') }}">
     
     {% if camera_on%}
-        <input type="submit" value="Stop View" name="stop" />
-        
+        {% if current_user.can(Permission.ADMIN) %}
+            <input type="submit" value="Stop showing camera" name="stop" />
+        {% endif %}
+
         <div class="box">
             <image src="{{ url_for('cam.video_feed') }}"
                     width="100%"
@@ -48,19 +31,25 @@
                     class="center">
         </div>
 
-        <h4>Save archives</h4>
-        <form method="post" action="{{ url_for('cam.tasks') }}">
-            {% if rec %}
-                <input type="submit" value="Stop Recording" name="rec_stop" />
-            {% else %}
-                <input type="submit" value="Start Recording" name="rec_start" />
-                
-                <input type="submit" value="Capture" name="click"/>
-            {% endif %}
-        </form>
+        {% if current_user.can(Permission.MODERATE) %}
+            <h4>Save archives</h4>
+            <form method="post" action="{{ url_for('cam.tasks') }}">
+                {% if rec %}
+                    <input type="submit" value="Stop Recording" name="rec_stop" />
+                {% else %}
+                    <input type="submit" value="Start Recording" name="rec_start" />
+                    
+                    <input type="submit" value="Capture" name="click"/>
+                {% endif %}
+            </form>
+        {% endif %}
 
     {% else %}
-    <input type="submit" value="View Camera" name="start" />
+        
+        <h1> Camera is OFF </h1>
+        {% if current_user.can(Permission.ADMIN) %}
+            <input type="submit" value="View Camera" name="start" />
+        {% endif %}    
     {% endif %}
 
 </form>

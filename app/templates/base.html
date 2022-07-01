@@ -31,8 +31,14 @@
                     <li><a href="{{ url_for('cam.tabela') }}">Project information</a></li>
                     {% if current_user.is_authenticated %}
                         <li><a href="{{ url_for('cam.index') }}">Camera</a></li>
-                        <li><a href="{{ url_for('cam.files') }}">Archives</a></li>
+                        <li><a href="{{ url_for('cam.files') }}">Saved videos</a></li>
                     {% endif %}
+
+                    {% if current_user.can(Permission.MODERATE) %}
+                        <li><a href="{{ url_for('cam.camera_cv') }}">Computer vision</a></li>
+                        <li><a href="{{ url_for('cam.servos') }}">Servo control</a></li>
+                    {% endif %}
+
                 </ul>
                 
                 <ul class="nav navbar-nav navbar-right">

@@ -20,6 +20,33 @@ min_H=-90;
 min_V=-90;
 
 
+varre = True
+
+def para_varredura():
+    global varre
+    varre = False
+
+def comeca_varredura():
+    global varre
+    varre = True
+
+
+def teste(x,passo=20): # 'x' equivale a tempo [em segundos] de varredura e 'passo' a quantidade de passos dentro do tempo 'x'
+    global varre
+
+    meio_passo = passo//2
+
+    while True:
+        for i in range(min_H, max_H, max_H//meio_passo):
+            if not varre:
+                return
+            print(i)
+        
+        for i in range(max_H, min_H, -max_H//meio_passo):
+            if not varre:
+                return
+            print(i)
+
 # more info at http://abyz.me.uk/rpi/pigpio/python.html#set_servo_pulsewidth
 
 pwm = pigpio.pi() #Inicia biblioteca
@@ -113,16 +140,20 @@ def Controle_Manual_V(angulo_V,slp=1): # 'angulo_V' [em graus] define o angulo d
 
 def Varredura_Servos(x,passo=20): # 'x' equivale a tempo [em segundos] de varredura e 'passo' a quantidade de passos dentro do tempo 'x'
 
+    global varre
     meio_passo = passo//2
 
     while True:
         for i in range(min_H, max_H, max_H//meio_passo):
+            if not varre:
+                return
             Controle_Manual_H(i, x//meio_passo)
         
         for i in range(max_H, min_H, -max_H//meio_passo):
+            if not varre:
+                return
             Controle_Manual_H(i, x//meio_passo)
 
-    #return 0
 
 #https://abyz.me.uk/rpi/pigpio/pdif2.html
 
