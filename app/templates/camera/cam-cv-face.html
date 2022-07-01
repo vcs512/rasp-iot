@@ -57,36 +57,9 @@
     <div class="right">
         {% if camera_on%}
             
-            {% if current_user.can(Permission.MODERATE) %}
+            {% if current_user.can(Permission.ADMIN) %}
                 <h2>Computer Vision</h2>
 
-                <h3> Motion Detection </h3>
-                <form method="post" action="{{ url_for('cam.tasks') }}">
-                    {% if dec_motion %}
-                        <input type="submit" value="Stop Motion" name="no_motion" />
-                    {% else %}
-                        <input type="submit" value="Motion" name="dec_motion" />
-                    {% endif %}
-                </form>
-            {% endif %}
-
-            {% if current_user.can(Permission.ADMIN) %}
-                <form method="post" action="{{ url_for('cam.tasks') }}">
-                    <input type="submit" value="Servo Follow Motion" name="follow_motion"/>
-                </form>
-            
-                <form method="post" action="{{ url_for('cam.camera_cv') }}">
-                    {{ wtf.quick_form(formPREMOTION) }}
-                </form>
-
-                <form action="{{ url_for('cam.camera_cv_fine_motion') }}">
-                    <button type="submit"> Fine motion adjust </button>
-                </form>
-            {% endif %}
-
-            <br>        
-            
-            {% if current_user.can(Permission.MODERATE) %}
                 <h3> Face Detection </h3>
                 <form method="post" action="{{ url_for('cam.tasks') }}">
                     {% if dec_face %}
@@ -95,24 +68,15 @@
                         <input type="submit" value="Face" name="dec_face" />
                     {% endif %}  
                 </form> 
-            {% endif %}   
 
-            {% if current_user.can(Permission.ADMIN) %}            
-                <form method="post" action="{{ url_for('cam.camera_cv') }}">
-                    {{ wtf.quick_form(formFACE) }}
+                <form method="post" action="{{ url_for('cam.camera_cv_fine_face') }}">
+                    {{ wtf.quick_form(formSCALE) }}
+                    {{ wtf.quick_form(formNEIG) }}
                 </form>
 
-                <form action="{{ url_for('cam.camera_cv_fine_face') }}">
-                    <button type="submit"> Fine face detection adjust </button>
-                </form>
             {% endif %}
-
-
-            {% if current_user.can(Permission.ADMIN) %}
-
-            {% endif %}
-            
-            {% endif %}
+        
+        {% endif %}
                 
                                
     </div>

@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, BooleanField, SelectField,\
-    SubmitField, IntegerField, FloatField
+    SubmitField, IntegerField, FloatField, RadioField
 from wtforms.fields.html5 import IntegerRangeField
 
 from wtforms.validators import DataRequired, Length, Email, Regexp, NumberRange
@@ -37,6 +37,12 @@ class Servo_V(FlaskForm):
     submit_V = SubmitField("Submit vertical")
 
 
+class cv_motion(FlaskForm):
+    '''adjust motion detection'''
+    adjust_motion = RadioField('Motion adjust', choices=[('1','Default'),('2','Best movement accommodation, less accuracy'), ('3','More accuracy and sensitivity')])
+    submit = SubmitField("Submit predefined motion profile")
+
+
 class cv_hist(FlaskForm):
     '''adjust number of frames for history in motion detection'''
 
@@ -55,6 +61,12 @@ class cv_lim_bin(FlaskForm):
     lim = IntegerField('Threshold value', validators=[NumberRange(min=5, max=250, message='Enter range between {} and {}'.format(5, 250))])
     submit = SubmitField("Submit threshold value")
 
+
+
+class cv_face(FlaskForm):
+    '''adjust face detection'''
+    adjust_face = RadioField('Face detection adjust', choices=[('1','Default'),('2','Smaller faces, more intensive'), ('3','More accuracy')])
+    submit = SubmitField("Submit predefined fece detection profile")
 
 class cv_scale(FlaskForm):
     '''adjust scale factor in face detection'''

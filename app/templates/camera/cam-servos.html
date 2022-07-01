@@ -49,21 +49,12 @@
             </form>
         
         {% else %}
-            <p> Click in "View Camera"</p>
+            <h1> Camera is OFF </h1>
         {% endif %}
     </div>
 
 
     <div class="right">
-        <form method="post" action="{{ url_for('cam.tasks') }}">
-                {% if camera_on%}
-                    <input type="submit" value="Stop View" name="stop" />
-                {% else %}
-                    <input type="submit" value="View Camera" name="start" />
-                {% endif %}
-        </form>
-        <br>
-         
                 {% if camera_on%}
                     {% if current_user.can(Permission.MODERATE) %}
                     

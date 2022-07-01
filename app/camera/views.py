@@ -22,10 +22,11 @@ import cv2
 import numpy as np
 from app.camera.visao import detect_face, motion
 from .forms import cv_hist, cv_dk, cv_lim_bin, cv_scale, cv_min_neig
+from .forms import cv_motion, cv_face
 
 # servos control
 from app.camera.servo import Servo_Control
-from .forms import Controle_servo, Servo_H, Servo_V
+from .forms import Servo_H, Servo_V
 
 # MQTT
 from app.mqtt_func import mqtt_func
@@ -60,7 +61,6 @@ camera_on = False
 rec = False
 
 varre = False
-varrendo = False
 lock_servos = False
 follow_motion = False
 follow_face = False
@@ -78,39 +78,23 @@ min_vizinhos = 2
 camera_device = 0
 
 
+# generator function
 def gen_frames():  
     '''generator: generate frame by frame from camera'''
 
-    global out, capture, rec_frame, varrendo, dec_motion, dec_face, varre, back_sub, history, dk, lim_bin, face_scale, min_vizinhos
-    global a,b
+    global capture, rec_frame
+    global varre
+    global dec_motion, back_sub, history, dk, lim_bin
+    global dec_face, face_scale, min_vizinhos
+    global bound_inf, bound_sup
 
     while rec or camera_on:
-        
-        # recording
-        if rec:
-            try:
-                _, buffer = cv2.imencode('.jpg', rec_frame)
-                frame = buffer.tobytes()
-                yield (b'--frame\r\n'
-                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-            except Exception as e:
-                pass
 
-
-
-        # just see camera
-        else:
-            success, frame = camera.read()
+        success, frame = camera.read()
+        if not rec:
+            # just see camera
             if success:
                 (w,h,_) = frame.shape
-                
-                # modify frame with functions
-                if dec_motion:
-                    frame, a, b = motion.motion(frame,w,h, back_sub, reduc=2, history=history, dk=dk)
-                    
-                if dec_face:
-                    frame = detect_face.detect_face(frame,w,h, scaleFactor=face_scale, minNeighbors=min_vizinhos)
-
 
                 # save picture
                 if capture:
@@ -118,15 +102,22 @@ def gen_frames():
                     now = datetime.datetime.now()
                     p = os.path.sep.join(['shots', "shot_{}.png".format(str(now).replace(":",''))])
                     cv2.imwrite(p, frame)
+                
+                # modify frame with functions
+                if dec_motion:
+                    frame, bound_inf, bound_sup = motion.motion(frame,w,h, back_sub, reduc=2, history=history, dk=dk)
+                    
+                if dec_face:
+                    frame = detect_face.detect_face(frame,w,h, scaleFactor=face_scale, minNeighbors=min_vizinhos)
 
-                # try to return frame                    
-                try:
-                    _, buffer = cv2.imencode('.jpg', frame)
-                    frame = buffer.tobytes()
-                    yield (b'--frame\r\n'
-                           b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-                except Exception as e:
-                    pass
+        # try to return frame                    
+        try:
+            _, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        except Exception as e:
+            pass
             
 
 
@@ -153,8 +144,57 @@ def index():
 # computer vision view
 @cam.route('/camera_cv', methods=['GET', 'POST'])
 @login_required
+@permission_required(Permission.MODERATE)
 def camera_cv():
-    global camera_on, dec_face, dec_motion, rec, varre, back_sub, dk, lim_bin, history, face_scale, min_vizinhos
+    global camera_on, dec_face, dec_motion, rec, back_sub
+    global dk, lim_bin, history, face_scale, min_vizinhos
+
+    if rec:
+        return redirect((url_for('cam.index')))
+
+    formPREMOTION = cv_motion()
+    if formPREMOTION.validate_on_submit():
+        option = formPREMOTION.adjust_motion.data
+        if option == 1:
+            history = 50
+            lim_bin = 80
+            dk = 50
+        if option == 2:
+            history = 20
+            lim_bin = 120
+            dk = 50
+        if option == 3:
+            history = 200
+            lim_bin = 80
+            dk = 30
+        back_sub = cv2.createBackgroundSubtractorMOG2(history=history, varThreshold=lim_bin, detectShadows=True)    
+
+    formFACE = cv_face()
+    if formFACE.validate_on_submit():
+        option = formFACE.adjust_face.data
+        if option == 1:
+            face_scale = 1.0
+            min_vizinhos = 5
+        if option == 2:
+            face_scale = 0.5
+            min_vizinhos = 5
+        if option == 3:
+            face_scale = 1.0
+            min_vizinhos = 2     
+
+    return render_template('camera/cam-cv.html', camera_on = camera_on, rec = rec,\
+        dec_face = dec_face,formFACE=formFACE, \
+        dec_motion = dec_motion, formPREMOTION=formPREMOTION)
+
+# fine adjust for motion detection
+@cam.route('/camera_cv_fine_motion', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MODERATE)
+def camera_cv_fine_motion():
+    global camera_on, dec_motion, rec, back_sub, dk, lim_bin, history
+
+    if rec:
+        return redirect((url_for('cam.index')))
 
     formHIST = cv_hist()
     if formHIST.validate_on_submit():
@@ -168,8 +208,22 @@ def camera_cv():
 
     formdk = cv_dk()
     if formdk.validate_on_submit():
-        dk = formdk.dk.data        
+        dk = formdk.dk.data             
 
+    return render_template('camera/cam-cv-motion.html', camera_on = camera_on, rec = rec,\
+        dec_motion = dec_motion, formHIST=formHIST, formdk=formdk, formLIM=formLIM)
+
+
+
+# fine adjust for face detection
+@cam.route('/camera_cv_fine_face', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.MODERATE)
+def camera_cv_fine_face():
+    global camera_on, dec_face, rec, varre, face_scale, min_vizinhos
+
+    if rec:
+        return redirect((url_for('cam.index')))   
 
     formSCALE = cv_scale()
     if formSCALE.validate_on_submit():
@@ -177,16 +231,17 @@ def camera_cv():
 
     formNEIG = cv_min_neig()
     if formNEIG.validate_on_submit():
-        min_vizinhos = formNEIG.min.data          
+        min_vizinhos = formNEIG.min.data        
 
-    return render_template('camera/cam-cv.html', camera_on = camera_on, rec = rec,\
-        dec_face = dec_face, formSCALE=formSCALE, formNEIG=formNEIG,\
-        dec_motion = dec_motion, formHIST=formHIST, formdk=formdk, formLIM=formLIM)
+    return render_template('camera/cam-cv-face.html', camera_on = camera_on, rec = rec,\
+        dec_face = dec_face, formSCALE=formSCALE, formNEIG=formNEIG)
+
 
 
 # servo control view
 @cam.route('/servos', methods=['GET', 'POST'])
 @login_required
+@permission_required(Permission.MODERATE)
 def servos():
     global camera_on, rec, varre, lock_servos
     
@@ -283,8 +338,9 @@ def cam_record():
 @cam.route('/cam_requests',methods=['POST','GET'])
 @login_required
 def tasks():
-    global camera_on, camera, camera_device, capture, dec_motion, dec_face, rec, varre, lock_servos, follow_motion, follow_face
-    global a,b
+    global camera_on, camera, camera_device, capture
+    global dec_motion, dec_face, rec, follow_motion
+    global bound_inf, bound_sup
     print('Entering cam_requests')
     if request.method == 'POST':
         
@@ -299,8 +355,8 @@ def tasks():
             dec_motion = True
 
         elif  request.form.get('follow_motion'):
-            pos_H = (a+b)[0]//2
-            pos_V = (a+b)[1]//2
+            pos_H = (bound_inf+bound_sup)[0]//2
+            pos_V = (bound_inf+bound_sup)[1]//2
             Servo_Control.Center_Object(pos_H,pos_V,Resolucao_H=640,Resolucao_V=480)
 
 
