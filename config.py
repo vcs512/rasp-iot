@@ -7,6 +7,9 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_RECORD_QUERIES = True
 
+    # get form environment
+    VIGISEL_ADMIN = os.environ.get('VIGISEL_ADMIN')
+
     @staticmethod
     def init_app(app):
         pass

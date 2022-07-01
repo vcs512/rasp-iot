@@ -7,7 +7,7 @@ from flask_sqlalchemy import get_debug_queries
 from . import main
 from .forms import TrocaRole
 from .. import db
-from ..models import Permission, Role, User, Post, Comment
+from ..models import Permission, Role, User
 from ..decorators import admin_required, permission_required
 
 
@@ -44,6 +44,10 @@ def moderate():
 def moderate_number(id):
     form = TrocaRole()
     usuario = User.query.get_or_404(id)
+
+    # if ADMIN scapes
+    if usuario.role_id == 3:
+        return redirect('/moderate')
     
     if form.validate_on_submit():
         role = form.role.data
