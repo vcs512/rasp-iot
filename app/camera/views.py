@@ -368,11 +368,6 @@ def tasks():
             pos_V = (bound_inf+bound_sup)[1]//2
             Servo_Control.Center_Object(pos_H,pos_V,Resolucao_H=640,Resolucao_V=480)
 
-
-        elif  request.form.get('follow_face'):
-            follow_face = True
-
-
         # face detection
         elif  request.form.get('no_face'):
             dec_face = False
