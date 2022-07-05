@@ -56,23 +56,26 @@ if gpio_ok:
     GPIO.setwarnings(False)
 
 
-# global interfunction variables
+## global interfunction variables
 capture = False
 camera_on = False
 rec = False
 
+# servos vars
 varre = False
 lock_servos = False
 follow_motion = False
-follow_face = False
 
+# motion detection
 dec_motion = False
-dec_face = False
+# Create the background subtractor object
 back_sub = cv2.createBackgroundSubtractorMOG2(history=50, varThreshold=80, detectShadows=True)    
 history = 50
 dk = 50
 lim_bin = 80
 
+# face detection
+dec_face = False
 face_scale = 1.1
 min_vizinhos = 2
 
@@ -133,12 +136,12 @@ def video_feed():
     if camera_on or rec:
         return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
     else:
-        return redirect(url_for('.index'))
+        return 'Camera is OFF'
 
 
 
 # full main camera view
-@cam.route('/camera', methods=['GET', 'POST'])
+@cam.route('/camera', methods=['GET'])
 @login_required
 def index():
     global camera_on, rec
@@ -161,7 +164,6 @@ def camera_cv():
     formPREMOTION = cv_motion()
     if formPREMOTION.validate_on_submit():
         option = formPREMOTION.adjust_motion.data
-        print('option = ', option, type(option))
         if option == '1':
             history = 50
             lim_bin = 80
@@ -197,7 +199,7 @@ def camera_cv():
 # fine adjust for motion detection
 @cam.route('/camera_cv_fine_motion', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MODERATE)
+@permission_required(Permission.ADMIN)
 def camera_cv_fine_motion():
     global camera_on, dec_motion, rec, back_sub, dk, lim_bin, history
 
@@ -230,7 +232,7 @@ def camera_cv_fine_motion():
 # fine adjust for face detection
 @cam.route('/camera_cv_fine_face', methods=['GET', 'POST'])
 @login_required
-@permission_required(Permission.MODERATE)
+@permission_required(Permission.ADMIN)
 def camera_cv_fine_face():
     global camera_on, dec_face, rec, varre, face_scale, min_vizinhos
 

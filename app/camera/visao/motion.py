@@ -1,7 +1,7 @@
+# https://automaticaddison.com/motion-detection-using-opencv-on-raspberry-pi-4/ 
+
 import cv2
 import numpy as np
-
-# back_sub = cv2.createBackgroundSubtractorMOG2(history=50, varThreshold=25, detectShadows=True)
 
 def motion(frame,w,h, back_sub, reduc=2, history=50, dk=50):
     '''use cv to detect motion
@@ -10,7 +10,6 @@ def motion(frame,w,h, back_sub, reduc=2, history=50, dk=50):
     dk:      small = detect minor objects movement
     '''
 
-    # Create the background subtractor object
     # back_sub = cv2.createBackgroundSubtractorMOG2(history=history, varThreshold=25, detectShadows=True)
 
     # kernel for morphological operation
@@ -20,12 +19,9 @@ def motion(frame,w,h, back_sub, reduc=2, history=50, dk=50):
     kernel = np.ones((dk,dk),np.uint8)
 
     cinza = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    # (linhas, colunas) = cinza.shape
     cinza = cv2.resize( cinza, (h//reduc, w//reduc) )
-    # frame = cv2.resize( frame, (colunas//2, linhas//2) )
     
     # create foreground mask
-    # fg_mask = back_sub.apply(frame)
     fg_mask = back_sub.apply(cinza)
      
     # close gaps using closing (morphology)
@@ -43,7 +39,6 @@ def motion(frame,w,h, back_sub, reduc=2, history=50, dk=50):
   
     # If there are no countours
     if len(areas) < 1:
-        # frame = cv2.resize( frame, (linhas, colunas))
         return frame, [320,240], [320,240]
   
     else:

@@ -1,3 +1,5 @@
+# https://github.com/informramiz/Face-Detection-OpenCV
+
 import cv2
 
 def detect_face(frame,w,h, scaleFactor=1.0, minNeighbors=2):

@@ -94,6 +94,86 @@ reiniciar a rasp em seguida:
 sudo reboot
 ```
 
+# Arquitetura do projeto
+```bash
+.
+└── rasp-iot
+    ├── app
+    │   ├── auth
+    │   │   ├── forms.py
+    │   │   ├── __init__.py
+    │   │   └── views.py
+    │   ├── camera
+    │   │   ├── forms.py
+    │   │   ├── __init__.py
+    │   │   ├── servo
+    │   │   │   ├── __init__.py
+    │   │   │   └── Servo_Control.py
+    │   │   ├── views.py
+    │   │   └── visao
+    │   │       ├── detect_face.py
+    │   │       ├── __init__.py
+    │   │       ├── motion.py
+    │   ├── decorators.py
+    │   ├── __init__.py
+    │   ├── main
+    │   │   ├── errors.py
+    │   │   ├── forms.py
+    │   │   ├── __init__.py
+    │   │   └── views.py
+    │   ├── models.py
+    │   ├── mqtt_func
+    │   │   ├── __init__.py
+    │   │   ├── mqtt_func.py
+    │   ├── static
+    │   │   ├── favicon.ico
+    │   │   └── styles.css
+    │   └── templates
+    │       ├── 403.html
+    │       ├── 404.html
+    │       ├── 500.html
+    │       ├── auth
+    │       │   ├── change_password.html
+    │       │   ├── login.html
+    │       │   └── register.html
+    │       ├── base.html
+    │       ├── camera
+    │       │   ├── cam-cv-face.html
+    │       │   ├── cam-cv.html
+    │       │   ├── cam-cv-motion.html
+    │       │   ├── camera.html
+    │       │   ├── cam-servos.html
+    │       │   └── files.html
+    │       ├── exclude_number.html
+    │       ├── index.html
+    │       ├── moderate.html
+    │       ├── moderate_number.html
+    │       └── project_info.html
+    ├── cliente
+    │   └── cliente_mqtt.py
+    ├── config.py
+    ├── data-dev.sqlite
+    ├── LICENSE
+    ├── log.txt
+    ├── migrations
+    │   ├── alembic.ini
+    │   ├── env.py
+    ├── README.md
+    ├── requirements.txt
+    ├── saved_model
+    │   ├── deploy.prototxt.txt
+    │   ├── haarcascade_frontalface_alt.xml
+    │   ├── haarcascade_frontalface_default.xml
+    │   ├── lbpcascade_frontalface.xml
+    │   └── res10_300x300_ssd_iter_140000.caffemodel
+    ├── shots
+    ├── videos
+    ├── vigisel.py
+    └── vigiSEL.service
+
+28 directories, 89 files
+```
+
 
 # Referências
 
