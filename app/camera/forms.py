@@ -39,14 +39,14 @@ class Servo_V(FlaskForm):
 
 class cv_motion(FlaskForm):
     '''adjust motion detection'''
-    adjust_motion = RadioField('Motion adjust', choices=[('1','Default'),('2','Best movement accommodation, less accuracy'), ('3','More accuracy and sensitivity')])
+    adjust_motion = RadioField('Motion adjust', choices=[(1,'Default'),(2,'Best movement accommodation, less accuracy'), (3,'More accuracy and sensitivity')])
     submit = SubmitField("Submit predefined motion profile")
 
 
 class cv_hist(FlaskForm):
     '''adjust number of frames for history in motion detection'''
 
-    history = IntegerField('Number of past frames to considerate', validators=[NumberRange(min=1, max=1e6, message='Enter range between {} and {}'.format(1, 1e6))])
+    history = IntegerField('Number of past frames to considerate', validators=[NumberRange(min=1, max=1000, message='Enter range between {} and {}'.format(1, 1000))])
     submit = SubmitField("Submit number of past frames")
 
 class cv_dk(FlaskForm):
@@ -65,17 +65,17 @@ class cv_lim_bin(FlaskForm):
 
 class cv_face(FlaskForm):
     '''adjust face detection'''
-    adjust_face = RadioField('Face detection adjust', choices=[('1','Default'),('2','Smaller faces, more intensive'), ('3','More accuracy')])
+    adjust_face = RadioField('Face detection adjust', choices=[(1,'Default'),(2, 'Less consuming')])
     submit = SubmitField("Submit predefined fece detection profile")
 
 class cv_scale(FlaskForm):
     '''adjust scale factor in face detection'''
 
-    scale = FloatField('Scale factor', validators=[NumberRange(min=0.5, max=5, message='Enter range between {} and {}'.format(0.5, 5))])
+    scale = FloatField('Scale factor', validators=[NumberRange(min=1.1, max=3, message='Enter range between {} and {}'.format(1.1, 3))])
     submit = SubmitField("Submit scale factor")    
 
 class cv_min_neig(FlaskForm):
     '''minimum Neighbors in face detection'''
 
-    min = IntegerField('Minimum Neighbors', validators=[NumberRange(min=2, max=40, message='Enter range between {} and {}'.format(2, 40))])
+    min = IntegerField('Minimum Neighbors', validators=[NumberRange(min=1, max=20, message='Enter range between {} and {}'.format(1, 20))])
     submit = SubmitField("Submit minimum neighbors")       

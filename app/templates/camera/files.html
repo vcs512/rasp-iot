@@ -12,7 +12,17 @@
     {% for r, d, tm in data %}
     <tr>
         <td>{{ r }}</td>
-        <td><form method="POST" action="file_action"><input type="hidden"  name="date" value="{{ d }}"><input type="hidden" name="time" value="{{ tm }}"><input type="Submit" name="download" value="Baixar"><input type="Submit" name="erase" value="Apagar"></form></td>
+        <td>
+            <form method="POST" action="file_action">
+                <input type="hidden"  name="date" value="{{ d }}">
+                <input type="hidden" name="time" value="{{ tm }}">
+                <input type="Submit" name="download" value="Download">
+                
+                {% if current_user.can(Permission.ADMIN) %}
+                    <input type="Submit" name="erase" value="Erase">
+                {% endif %}
+            </form>
+        </td>
     </tr>
     {% endfor %}
 </ul>

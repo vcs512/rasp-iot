@@ -1,9 +1,7 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
-{% import "_macros.html" as macros %}
-
-{% block title %}VigiSEL - Comment Moderation{% endblock %}
+{% block title %}VigiSEL - User Management {% endblock %}
 
 {% block page_content %}
 
@@ -21,15 +19,16 @@
     
     {% for row in rows %}
       <tr>
-          <td>{{row.email}}</td>
-          <td>{{row.member_since}} </td>
-          <td>{{row.last_seen}}</td>
-
+         
          {% if row.role_id == 3 %}
-            <td>{{row.role_id}}</td>
+            <td>{{row.email}}</td>
          {% else %}
-          <td> <a href="{{ url_for('main.moderate_number', id=row.id) }}">{{ row.role_id}}</a></td>
-         {% endif %}
+            <td> <a href="{{ url_for('main.moderate_number', id=row.id) }}">{{ row.email }}</a></td>
+         {% endif %}   
+         
+         <td>{{row.member_since}} </td>
+         <td>{{row.last_seen}}</td>
+         <td>{{row.role_id}}</td>
       </tr>
     {% endfor %}
  </table>

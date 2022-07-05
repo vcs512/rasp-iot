@@ -68,6 +68,14 @@
                         <input type="submit" value="Motion" name="dec_motion" />
                     {% endif %}
                 </form>
+
+                Current motion detection parameters:
+                <ul>
+                    <li> Number of past frames = {{ history }}</li>
+                    <li> Kernel size = {{ dk }}</li>
+                    <li> Threshold value = {{ lim_bin }}</li>
+                </ul>
+
             {% endif %}
 
             {% if current_user.can(Permission.ADMIN) %}

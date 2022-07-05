@@ -69,6 +69,12 @@
                     {% endif %}  
                 </form> 
 
+                Current face detection parameters:
+                <ul>
+                    <li> Face scale factor = {{ face_scale }}</li>
+                    <li> Number of minimum neighbors = {{ min_vizinhos }}</li>
+                </ul>
+
                 <form method="post" action="{{ url_for('cam.camera_cv_fine_face') }}">
                     {{ wtf.quick_form(formSCALE) }}
                     {{ wtf.quick_form(formNEIG) }}

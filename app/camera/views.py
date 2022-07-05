@@ -1,5 +1,6 @@
 # flask-WEB
 from concurrent.futures import thread
+from flask import flash
 from flask import Flask, render_template, Response, request, redirect, url_for, send_file
 from flask_login import login_required, current_user
 from . import cam
@@ -90,9 +91,9 @@ def gen_frames():
 
     while rec or camera_on:
 
-        success, frame = camera.read()
         if not rec:
             # just see camera
+            success, frame = camera.read()
             if success:
                 (w,h,_) = frame.shape
 
@@ -112,7 +113,11 @@ def gen_frames():
 
         # try to return frame                    
         try:
-            _, buffer = cv2.imencode('.jpg', frame)
+            if not rec:
+                _, buffer = cv2.imencode('.jpg', frame)
+            else:
+                _, buffer = cv2.imencode('.jpg', rec_frame)
+
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
@@ -150,37 +155,40 @@ def camera_cv():
     global dk, lim_bin, history, face_scale, min_vizinhos
 
     if rec:
+        flash('Camera is recording')
         return redirect((url_for('cam.index')))
 
     formPREMOTION = cv_motion()
     if formPREMOTION.validate_on_submit():
         option = formPREMOTION.adjust_motion.data
-        if option == 1:
+        print('option = ', option, type(option))
+        if option == '1':
             history = 50
             lim_bin = 80
             dk = 50
-        if option == 2:
+        if option == '2':
             history = 20
             lim_bin = 120
             dk = 50
-        if option == 3:
+        if option == '3':
             history = 200
             lim_bin = 80
             dk = 30
+        
+        flash('Motion profile updated')
         back_sub = cv2.createBackgroundSubtractorMOG2(history=history, varThreshold=lim_bin, detectShadows=True)    
 
     formFACE = cv_face()
     if formFACE.validate_on_submit():
         option = formFACE.adjust_face.data
-        if option == 1:
-            face_scale = 1.0
+        if option == '1':
+            face_scale = 1.1
+            min_vizinhos = 2
+        if option == '2':
+            face_scale = 1.5
             min_vizinhos = 5
-        if option == 2:
-            face_scale = 0.5
-            min_vizinhos = 5
-        if option == 3:
-            face_scale = 1.0
-            min_vizinhos = 2     
+
+        flash('Face detection profile updated')  
 
     return render_template('camera/cam-cv.html', camera_on = camera_on, rec = rec,\
         dec_face = dec_face,formFACE=formFACE, \
@@ -200,18 +208,22 @@ def camera_cv_fine_motion():
     if formHIST.validate_on_submit():
         history = formHIST.history.data
         back_sub = cv2.createBackgroundSubtractorMOG2(history=history, varThreshold=lim_bin, detectShadows=True)    
+            
 
     formLIM = cv_lim_bin()
     if formLIM.validate_on_submit():
         lim_bin = formLIM.lim.data
         back_sub = cv2.createBackgroundSubtractorMOG2(history=history, varThreshold=lim_bin, detectShadows=True)    
+        flash('Binary threshold updated') 
 
     formdk = cv_dk()
     if formdk.validate_on_submit():
         dk = formdk.dk.data             
+        flash('Kernel size updated') 
 
     return render_template('camera/cam-cv-motion.html', camera_on = camera_on, rec = rec,\
-        dec_motion = dec_motion, formHIST=formHIST, formdk=formdk, formLIM=formLIM)
+        dec_motion = dec_motion, formHIST=formHIST, formdk=formdk, formLIM=formLIM, \
+            history=history, dk=dk, lim_bin=lim_bin)
 
 
 
@@ -228,13 +240,16 @@ def camera_cv_fine_face():
     formSCALE = cv_scale()
     if formSCALE.validate_on_submit():
         face_scale = formSCALE.scale.data  
+        flash('Face scale updated') 
 
     formNEIG = cv_min_neig()
     if formNEIG.validate_on_submit():
         min_vizinhos = formNEIG.min.data        
+        flash('Minimum neighbors updated') 
 
     return render_template('camera/cam-cv-face.html', camera_on = camera_on, rec = rec,\
-        dec_face = dec_face, formSCALE=formSCALE, formNEIG=formNEIG)
+        dec_face = dec_face, formSCALE=formSCALE, formNEIG=formNEIG,\
+            min_vizinhos=min_vizinhos, face_scale=face_scale)
 
 
 
@@ -274,14 +289,6 @@ def servos():
                             varre=varre, lock_servos=lock_servos, \
                             angulo_H=angulo_H, angulo_V=angulo_V, \
                             formH=formH, formV=formV)
-
-
-
-@cam.route('/cam_adm',methods=['POST','GET'])
-@login_required
-@permission_required(Permission.ADMIN)
-def teste():
-    return 'so adm'
 
 
 # function to record videos
@@ -459,6 +466,7 @@ def servo_tasks():
 # view to show archives
 @cam.route('/files',methods=['POST','GET'])
 @login_required
+@permission_required(Permission.MODERATE)
 def files():
     fns = glob.glob('videos/*.avi')
     if fns != []:
@@ -473,6 +481,7 @@ def files():
 # view to download archives
 @cam.route('/file_action',methods=['POST'])
 @login_required
+@permission_required(Permission.MODERATE)
 def file_action():
     if request.form.get('download'):
         print('download')

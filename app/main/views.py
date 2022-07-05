@@ -5,7 +5,7 @@ from flask import render_template, redirect, url_for, abort, flash, request,\
 from flask_login import login_required, current_user
 from flask_sqlalchemy import get_debug_queries
 from . import main
-from .forms import TrocaRole
+from .forms import TrocaRole, ExcluirUser
 from .. import db
 from ..models import Permission, Role, User
 from ..decorators import admin_required, permission_required
@@ -60,10 +60,8 @@ def moderate_number(id):
         role = form.role.data
         role = int(role)
         
-        usuario = User.query.get_or_404(id)
-        usuario.role_id = role
-
         try:
+            usuario.role_id = role
             db.session.add(usuario)
             db.session.commit()
         except:
@@ -72,3 +70,31 @@ def moderate_number(id):
         return redirect('/moderate')
     
     return render_template('moderate_number.html', form=form, usuario=usuario)
+
+
+# exclude user page
+@main.route('/exclude/<int:id>', methods=['GET', 'POST'])
+@login_required
+@permission_required(Permission.ADMIN)
+def exclude_number(id):
+    form = ExcluirUser()
+    usuario = User.query.get_or_404(id)
+    print(usuario)
+
+    # if ADMIN scapes
+    if usuario.role_id == 3:
+        return redirect('/moderate')
+    
+    if form.validate_on_submit():
+        if current_user.verify_password(form.password.data):
+
+            try:
+                db.session.delete(usuario)
+                db.session.commit()
+                flash('User excluded')
+            except:
+                flash('Operation not commited in database')
+
+            return redirect('/moderate')
+    
+    return render_template('exclude_number.html', form=form, usuario=usuario)    

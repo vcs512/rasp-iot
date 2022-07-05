@@ -1,21 +1,18 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 
-{% block title %}VigiSEL - Role Management {% endblock %}
+{% block title %}VigiSEL - User exclusion{% endblock %}
 
 {% block page_content %}
 
-{% if current_user.can(Permission.ADMIN) %}
-
-<td> <a href="{{ url_for('main.exclude_number', id=usuario.id) }}"> Exclude user </a></td>
-
-<h3> User: {{ usuario.email }}</h3>
-
-
 <div class="page-header">
-    <h1>Change role</h1>
+    <h1>User exclusion</h1>
 </div>
 
+<h3> Excluding user: {{ usuario.email }}</h3>
+
+
+{% if current_user.can(Permission.ADMIN) %}
     <div class="container">
         <div class="row">
             {{ wtf.quick_form(form) }}
