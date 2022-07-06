@@ -364,8 +364,9 @@ def tasks():
             dec_motion = True
 
         elif  request.form.get('follow_motion'):
-            pos_H = (bound_inf+bound_sup)[0]//2
-            pos_V = (bound_inf+bound_sup)[1]//2
+            pos_H = (bound_inf[0]+bound_sup[0])//2
+            pos_V = (bound_inf[1]+bound_sup[1])//2
+            print("pos_H",pos_H,"pos_V",pos_V)
             Servo_Control.Center_Object(pos_H,pos_V,Resolucao_H=640,Resolucao_V=480)
 
         # face detection
@@ -418,10 +419,10 @@ def servo_tasks():
         # arrow fine servo
         if  request.form.get('left'):
             angulo_H = Servo_Control.Angulo_Atual_H()
-            Servo_Control.Controle_Manual_H( np.max( np.array([angulo_H-10, Servo_Control.min_H])),slp=1)
+            Servo_Control.Controle_Manual_H( np.max( np.array([angulo_H+10, Servo_Control.min_H])),slp=1)
         elif  request.form.get('right'):
             angulo_H = Servo_Control.Angulo_Atual_H()
-            Servo_Control.Controle_Manual_H( np.min( np.array([angulo_H+10, Servo_Control.max_H]) ),slp=1)
+            Servo_Control.Controle_Manual_H( np.min( np.array([angulo_H-10, Servo_Control.max_H]) ),slp=1)
 
         elif  request.form.get('down'):
             angulo_V = Servo_Control.Angulo_Atual_V()
