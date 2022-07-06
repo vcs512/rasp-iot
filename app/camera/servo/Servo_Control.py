@@ -222,33 +222,56 @@ def Center_Object(pos_H,pos_V,Resolucao_H=3280,Resolucao_V=2464):
     
     Sinal_V=0.0
     Sinal_H=0.0
-    if Angulo_Atual_H >= 0:
-        if pos_H>=Resolucao_H/2.0:
-            Sinal_H=-1.0
-        else:
-            Sinal_H=1.0
-    elif Angulo_Atual_H < 0:
-        if pos_H>=Resolucao_H/2.0:
-            Sinal_H=1.0
-        else:
-            Sinal_H=-1.0
-    if Angulo_Atual_V >= 0:
-        if pos_V>=Resolucao_V/2.0:
-            Sinal_V=1.0
-        else:
-            Sinal_V=-1.0 
 
-    elif Angulo_Atual_V < 0:
+    # if pos_H > .7*Resolucao_H:
+    #     pos_H = .7*Resolucao_H
 
-        if pos_V>=Resolucao_V/2.0:
-            Sinal_V=-1.0
-        else:
-            Sinal_V=1.0      
+    # if pos_V > .9*Resolucao_V:
+    #     pos_V = .9*Resolucao_V
 
-    angulo_H=Angulo_Atual_H+2.0*Sinal_H*math.degrees(math.atan((1.0*math.fabs(pos_H-Resolucao_H/2.0)*Sx)/f))
-    angulo_V=Angulo_Atual_V+2.0*Sinal_V*math.degrees(math.atan((1.0*math.fabs(pos_V-Resolucao_V/2.0)*Sx)/f))
+    # if Angulo_Atual_H >= 0:
+    #     if pos_H>=Resolucao_H/2.0:
+    #         Sinal_H=-1.0
+    #     else:
+    #         Sinal_H=1.0
+    # elif Angulo_Atual_H < 0:
+    #     if pos_H>=Resolucao_H/2.0:
+    #         Sinal_H=1.0
+    #     else:
+    #         Sinal_H=-1.0
+    # if Angulo_Atual_V >= 0:
+    #     if pos_V>=Resolucao_V/2.0:
+    #         Sinal_V=1.0
+    #     else:
+    #         Sinal_V=-1.0 
+
+    # elif Angulo_Atual_V < 0:
+
+    #     if pos_V>=Resolucao_V/2.0:
+    #         Sinal_V=-1.0
+    #     else:
+    #         Sinal_V=1.0      
+
+    print('Angulo_Atual_H = ', Angulo_Atual_H)
+    angulo_H=Angulo_Atual_H-5.0*math.degrees(math.atan((1.0*(pos_H-Resolucao_H/2.0)*Sx)/f))
+
+    if (angulo_H)<min_H or (angulo_H)>max_H:
+            if (angulo_H<min_H):
+                angulo_H = min_H
+            elif ((angulo_H)>max_H):
+                angulo_H = max_H
+        
+    print('angulo dentro da funcao = ', angulo_H)
+    angulo_V=Angulo_Atual_V+5.0*math.degrees(math.atan((1.0*(pos_V-Resolucao_V/2.0)*Sx)/f))
     
+    if (angulo_V)<min_V or (angulo_V)>max_V:
+            if (angulo_V<min_V):
+                angulo_V = min_V
+            elif ((angulo_V)>max_V):
+                angulo_V = max_V
+
     Controle_Manual(angulo_H,angulo_V,1)
         
 #while True:
+#    Center_Object(float(input("Rotacao_H: ")),float(input("Rotacao_V: ")))
 #    Controle_Manual_V(input("Rotacao_V: "),0.5)
