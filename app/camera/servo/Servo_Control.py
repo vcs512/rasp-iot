@@ -19,34 +19,6 @@ max_V=90;
 min_H=-90;
 min_V=-90;
 
-
-varre = True
-
-def para_varredura():
-    global varre
-    varre = False
-
-def comeca_varredura():
-    global varre
-    varre = True
-
-
-def teste(x,passo=20): # 'x' equivale a tempo [em segundos] de varredura e 'passo' a quantidade de passos dentro do tempo 'x'
-    global varre
-
-    meio_passo = passo//2
-
-    while True:
-        for i in range(min_H, max_H, max_H//meio_passo):
-            if not varre:
-                return
-            print(i)
-        
-        for i in range(max_H, min_H, -max_H//meio_passo):
-            if not varre:
-                return
-            print(i)
-
 # more info at http://abyz.me.uk/rpi/pigpio/python.html#set_servo_pulsewidth
 
 pwm = pigpio.pi() #Inicia biblioteca
@@ -71,6 +43,8 @@ def toggle_servo(X):#1-Servo ON; 0 - Servo OFF
         pwm.set_PWM_dutycycle(servo_V, 0)
         pwm.set_PWM_frequency(servo_V, 0)
         flash('Servos OFF')
+
+#Funcoes Internas do Código - Somente utilizadas na construção das externas
 
 def func(x): #Retorna o valor em segundos [para o t_{on} do PWM] da rotacao em graus desejada
     return (2000-1000)/(0-(-180))*x+1500 #Funcao de primeiro grau: P0=(-90,1000),P1=(0,1500) e P2=(2000,90)
@@ -108,6 +82,40 @@ def checa_angulo(angulo_V=0,angulo_H=0):#Retorna 0 se estiver errado e flash o p
         return 1
     
     
+
+#Funções Externas do Código - Funções chamadas em demais partes do código
+
+# Funções Externas adaptadas para poder trabalhar com multrithreading - Não recomenda-se o uso
+
+
+varre = True
+
+def para_varredura():
+    global varre
+    varre = False
+
+def comeca_varredura():
+    global varre
+    varre = True
+
+
+def teste(x,passo=20): # 'x' equivale a tempo [em segundos] de varredura e 'passo' a quantidade de passos dentro do tempo 'x'
+    global varre
+
+    meio_passo = passo//2
+
+    while True:
+        for i in range(min_H, max_H, max_H//meio_passo):
+            if not varre:
+                return
+            print(i)
+        
+        for i in range(max_H, min_H, -max_H//meio_passo):
+            if not varre:
+                return
+            print(i)
+
+
 
 def Controle_Manual(angulo_H=0,angulo_V=0,slp=1): # 'angulo_H' [em graus] e 'angulo_V' [em graus] define o angulo de rotação e 'slp' o tempo entre comandos [em segundos]
        
@@ -154,6 +162,15 @@ def Varredura_Servos(x,passo=20): # 'x' equivale a tempo [em segundos] de varred
                 return
             Controle_Manual_H(i, x//meio_passo)
 
+def Old_Varredura_Servos(x,passo=20): # 'x' equivale a tempo [em segundos] de varredura e 'passo' a quantidade de passos dentro do tempo 'x'
+
+    meio_passo = passo//2
+    for i in range(min_H, max_H, max_H//meio_passo):
+        Controle_Manual_H(i, x//meio_passo)
+    
+    for i in range(max_H, min_H, -max_H//meio_passo):
+        Controle_Manual_H(i, x//meio_passo)
+
 
 #https://abyz.me.uk/rpi/pigpio/pdif2.html
 
@@ -164,7 +181,10 @@ def Angulo_Atual_H(): #Retorna o angulo altual do servo motor horizontal
     return inv_func(pwm.get_servo_pulsewidth(servo_H))
         
 def Center_Object_H(pos_H,Resolucao_H=640): # 'pos_H' [em pixel] e 'pos_V' [em pixel] definem o local do Objeto no plano da câmera e 'Resolucao_H' [em pixel] e 'Resolucao_V' [em pixel] a resolução da mesma
-
+    
+    Sinal_H=0.0
+    pos_H=float(pos_H)
+    
     Angulo_Atual=inv_func(pwm.get_servo_pulsewidth(servo_H)) 
     if pos_H>=Resolucao_H/2.0:
         Sinal=1.0
@@ -177,6 +197,9 @@ def Center_Object_H(pos_H,Resolucao_H=640): # 'pos_H' [em pixel] e 'pos_V' [em p
     
 def Center_Object_V(pos_V,Resolucao_V=480): # 'pos_H' [em pixel] e 'pos_V' [em pixel] definem o local do Objeto no plano da câmera e 'Resolucao_H' [em pixel] e 'Resolucao_V' [em pixel] a resolução da mesma
 
+    Sinal_V=0.0
+    pos_V=float(pos_V)
+    
     Angulo_Atual=inv_func(pwm.get_servo_pulsewidth(servo_V)) 
     if pos_V>=Resolucao_V/2.0:
         Sinal=1.0
@@ -191,6 +214,9 @@ def Center_Object_V(pos_V,Resolucao_V=480): # 'pos_H' [em pixel] e 'pos_V' [em p
 def Center_Object(pos_H,pos_V,Resolucao_H=3280,Resolucao_V=2464):
     # 'pos_H' [em pixel] e 'pos_V' [em pixel] definem o local do Objeto no plano da câmera e 'Resolucao_H' [em pixel] e 'Resolucao_V' [em pixel] a resolução da mesma
 
+    pos_H=float(pos_H)
+    pos_V=float(pos_V)
+
     Angulo_Atual_H=inv_func(pwm.get_servo_pulsewidth(servo_H)) 
     Angulo_Atual_V=inv_func(pwm.get_servo_pulsewidth(servo_V)) 
     
@@ -198,29 +224,29 @@ def Center_Object(pos_H,pos_V,Resolucao_H=3280,Resolucao_V=2464):
     Sinal_H=0.0
     if Angulo_Atual_H >= 0:
         if pos_H>=Resolucao_H/2.0:
-            Sinal_H=1.0
-        else:
             Sinal_H=-1.0
+        else:
+            Sinal_H=1.0
     elif Angulo_Atual_H < 0:
         if pos_H>=Resolucao_H/2.0:
-            Sinal_H=-1.0
-        else:
             Sinal_H=1.0
-    if Angulo_Atual_V < 0:
-        if pos_V>=Resolucao_V/2.0:
-            Sinal_V=-1.0
         else:
-            Sinal_V=1.0 
+            Sinal_H=-1.0
+    if Angulo_Atual_V >= 0:
+        if pos_V>=Resolucao_V/2.0:
+            Sinal_V=1.0
+        else:
+            Sinal_V=-1.0 
 
     elif Angulo_Atual_V < 0:
 
         if pos_V>=Resolucao_V/2.0:
-            Sinal_V=1.0
+            Sinal_V=-1.0
         else:
-            Sinal_V=-1.0      
+            Sinal_V=1.0      
 
-    angulo_H=Angulo_Atual_H+1.0*Sinal_H*math.degrees(math.atan((1.0*math.fabs(pos_H-Resolucao_H/2.0)*Sx)/f))
-    angulo_V=Angulo_Atual_V+1.0*Sinal_V*math.degrees(math.atan((1.0*math.fabs(pos_V-Resolucao_V/2.0)*Sx)/f))
+    angulo_H=Angulo_Atual_H+2.0*Sinal_H*math.degrees(math.atan((1.0*math.fabs(pos_H-Resolucao_H/2.0)*Sx)/f))
+    angulo_V=Angulo_Atual_V+2.0*Sinal_V*math.degrees(math.atan((1.0*math.fabs(pos_V-Resolucao_V/2.0)*Sx)/f))
     
     Controle_Manual(angulo_H,angulo_V,1)
         
