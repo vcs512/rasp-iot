@@ -418,17 +418,17 @@ def servo_tasks():
         # arrow fine servo
         if  request.form.get('left'):
             angulo_H = Servo_Control.Angulo_Atual_H()
-            Servo_Control.Controle_Manual_H( np.max(angulo_H-10, Servo_Control.min_H),slp=1)
+            Servo_Control.Controle_Manual_H( np.max( np.array([angulo_H-10, Servo_Control.min_H])),slp=1)
         elif  request.form.get('right'):
             angulo_H = Servo_Control.Angulo_Atual_H()
-            Servo_Control.Controle_Manual_H( np.min(angulo_H+10, Servo_Control.max_H ),slp=1)
+            Servo_Control.Controle_Manual_H( np.min( np.array([angulo_H+10, Servo_Control.max_H]) ),slp=1)
 
         elif  request.form.get('down'):
             angulo_V = Servo_Control.Angulo_Atual_V()
-            Servo_Control.Controle_Manual_V( np.min(angulo_V+10, Servo_Control.max_V),slp=1)
+            Servo_Control.Controle_Manual_V( np.min( np.array([angulo_V+10, Servo_Control.max_V])),slp=1)
         elif  request.form.get('up'):
             angulo_V = Servo_Control.Angulo_Atual_V()
-            Servo_Control.Controle_Manual_V( np.max(angulo_V-10, Servo_Control.min_V),slp=1)
+            Servo_Control.Controle_Manual_V( np.max(np.array([angulo_V-10, Servo_Control.min_V])),slp=1)
 
 
         # servo sweep
