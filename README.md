@@ -83,7 +83,7 @@ ip link set eth0 address 00:01:02:03:04:05
 ip link set eth0 up
 ## Start virtualenv
 . /home/sel/Code/venv/bin/activate
-export FLASK_APP=/home/sel/Code/rasp-iot/macbee.py
+export FLASK_APP=/home/sel/Code/rasp-iot/vigisel.py
 ## Start GPIO daemon
 pigpiod
 ## Start server
