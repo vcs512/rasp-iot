@@ -4,80 +4,181 @@
 
 {% block page_content %}
 
-<h1 id="macbee">VigiSEL</h1>
-<h1 id="iniciar-servidor">Iniciar servidor</h1>
-<pre><code class="language-bash">export FLASK_APP=macbee.py
+<h1>vigiSEL</h1>
+<h1>Iniciar GPIO</h1>
+<p>Iniciar <em>daemon</em> de controle da GPIO:</p>
+<pre><code class="language-bash">sudo apt-get install python3-pigpio
+sudo pigpiod
+</code></pre>
+<h1>Iniciar servidor</h1>
+<pre><code class="language-bash">export FLASK_APP=vigisel.py
 flask run --host 0.0.0.0
 </code></pre>
-<h1 id="banco-de-dados">Banco de Dados</h1>
-<h2 id="para-criar-o-banco-de-dados">Para criar o banco de dados</h2>
+<h1>Banco de Dados</h1>
+<p>Documentação adicional em <a href="https://github.com/vcs512/rasp-iot/tree/master/app" target="_blank" rel="noopener noreferrer">https://github.com/vcs512/rasp-iot/tree/master/app</a></p>
+<h2>Criar e atualizar o banco de dados</h2>
 <pre><code class="language-bash">flask db init
 flask db migrate
 flask db upgrade
 </code></pre>
-<p>Abrir shell:</p>
+<h2>Abrir shell:</h2>
 <pre><code class="language-python">flask shell
 </code></pre>
-<h2 id="roles">Roles</h2>
-<p>Carregar Roles do schema:</p>
+<h2>Roles</h2>
+<p>Carregar Roles:</p>
 <pre><code class="language-python">Role.insert_roles()
 </code></pre>
 <p>Variáveis dos roles:</p>
-<pre><code class="language-python">role_user = Role.query.filter_by(name=&#39;User&#39;).first()
-role_moderator = Role.query.filter_by(name=&#39;Moderator&#39;).first()
-role_admin = Role.query.filter_by(name=&#39;Administrator&#39;).first()
+<pre><code class="language-python">role_user = Role.query.filter_by(name='User').first()
+role_moderator = Role.query.filter_by(name='Moderator').first()
+role_admin = Role.query.filter_by(name='Administrator').first()
 </code></pre>
-<p>Procuram a tabela de Roles por nome e encontram sua chave primária.</p>
-<h2 id="usuários">Usuários</h2>
-<h3 id="adicionar">Adicionar</h3>
+<h2>Operações com usuários por shell</h2>
+<h3>Adicionar</h3>
 <p>Adicionar um usuário com role de administrador:</p>
-<pre><code class="language-python">u = User(email=&#39;john_admin@site.com&#39;, password=&#39;password_of_admin&#39;, name=&#39;John Admin&#39;, username=&#39;john_admin&#39;, confirmed=True, role=role_admin)
+<pre><code class="language-python">u = User(email='vigisel@gmail.com', password='vigiSEL', username='vigiSEL_ADMIN', confirmed=True, role=role_admin)
 </code></pre>
-<!-- Adicionar um usuário com role de moderador:
-
-```python
-u = User(name='John Smith', username='john_smith', password='password_of_john_smith', email='john_smith@site.com', confirmed=True, role=role_moderator)
-```
-
-Para adicionar um usuário comum:
-
-```python
-u = User(name='John Doe', username='john_doe', password='password_of_john_doe', email='john_doe@site.com', confirmed=True, role=role_user)
-``` -->
-
-<!-- > Os comandos acima já indicam a senha e que o e-mail do usuário é válido. O suporte a e-mails foi desativado nessa versão inicial, mas pode ser ativado para o caso de ser necessário confirmar os e-mails dos usuários. -->
-
 <p>A cada operação no banco de dados é necessário atualizar as alterações:</p>
 <pre><code class="language-python">db.session.add(u)
 db.session.commit()
 </code></pre>
-<h3 id="alterar-campos">Alterar Campos</h3>
+<h3>Alterar Campos</h3>
 <p>Obter a referência para o objeto do usuário e alterar o campo desejado:</p>
-<pre><code class="language-python">u = User.query.filter_by(username=&#39;john_doe&#39;).first()
+<pre><code class="language-python">u = User.query.filter_by(email='vigisel@gmail.com').first()
 u.role = role_moderator
 db.session.commit()
 </code></pre>
-<h3 id="apagar-usuário">Apagar usuário</h3>
+<h3>Apagar usuário</h3>
 <p>Procurar e apagar o usuário:</p>
-<pre><code class="language-python">User.query.filter(User.username == &#39;john_doe&#39;).delete()
+<pre><code class="language-python">User.query.filter(User.email == 'vigisel@gmail.com').delete()
 db.session.commit()
 </code></pre>
-<h1 id="referências">Referências</h1>
-<h2 id="flask-e-organização-de-projeto">Flask e organização de projeto</h2>
-<p>GRINBERG, Miguel. <strong>Flask web development: developing web applications with python</strong>. &quot; O&#39;Reilly Media, Inc.&quot;, 2018.</p>
-<h2 id="base-inicial-de-projeto">Base inicial de projeto</h2>
-<p><a href="https://github.com/jordeam/macbee">https://github.com/jordeam/macbee</a></p>
-<p><a href="https://github.com/miguelgrinberg/flasky-first-edition">https://github.com/miguelgrinberg/flasky-first-edition</a></p>
-<p><a href="https://github.com/miguelgrinberg/flasky">https://github.com/miguelgrinberg/flasky</a></p>
-<h2 id="streaming-de-camera">Streaming de camera</h2>
-<p><a href="https://towardsdatascience.com/camera-app-with-flask-and-opencv-bd147f6c0eec">https://towardsdatascience.com/camera-app-with-flask-and-opencv-bd147f6c0eec</a></p>
-<p><a href="https://github.com/hemanth-nag/Camera_Flask_App">https://github.com/hemanth-nag/Camera_Flask_App</a></p>
-<h2 id="detecção-de-movimento">Detecção de movimento</h2>
-<p><a href="https://automaticaddison.com/motion-detection-using-opencv-on-raspberry-pi-4/">https://automaticaddison.com/motion-detection-using-opencv-on-raspberry-pi-4/</a></p>
-<h2 id="detecção-de-face">Detecção de face</h2>
-<p><a href="https://github.com/informramiz/Face-Detection-OpenCV">https://github.com/informramiz/Face-Detection-OpenCV</a></p>
-<h2 id="requerimentos-opencv">Requerimentos OpenCV</h2>
-<p><a href="https://stackoverflow.com/questions/53347759/importerror-libcblas-so-3-cannot-open-shared-object-file-no-such-file-or-dire">https://stackoverflow.com/questions/53347759/importerror-libcblas-so-3-cannot-open-shared-object-file-no-such-file-or-dire</a></p>
+<h3>Sair da shell</h3>
+<pre><code class="language-python">exit()
+</code></pre>
+<h1>Arquitetura do projeto</h1>
+<pre><code class="language-bash">.
+└── rasp-iot
+    ├── app
+    │&nbsp;&nbsp; ├── auth
+    │&nbsp;&nbsp; │&nbsp;&nbsp; ├── forms.py
+    │&nbsp;&nbsp; │&nbsp;&nbsp; ├── __init__.py
+    │&nbsp;&nbsp; │&nbsp;&nbsp; └── views.py
+    │&nbsp;&nbsp; ├── camera
+    │&nbsp;&nbsp; │&nbsp;&nbsp; ├── forms.py
+    │&nbsp;&nbsp; │&nbsp;&nbsp; ├── __init__.py
+    │&nbsp;&nbsp; │&nbsp;&nbsp; ├── servo
+    │&nbsp;&nbsp; │&nbsp;&nbsp; │&nbsp;&nbsp; ├── __init__.py
+    │&nbsp;&nbsp; │&nbsp;&nbsp; │&nbsp;&nbsp; └── Servo_Control.py
+    │&nbsp;&nbsp; │&nbsp;&nbsp; ├── views.py
+    │&nbsp;&nbsp; │&nbsp;&nbsp; └── visao
+    │&nbsp;&nbsp; │&nbsp;&nbsp;     ├── detect_face.py
+    │&nbsp;&nbsp; │&nbsp;&nbsp;     ├── __init__.py
+    │&nbsp;&nbsp; │&nbsp;&nbsp;     ├── motion.py
+    │&nbsp;&nbsp; ├── decorators.py
+    │&nbsp;&nbsp; ├── __init__.py
+    │&nbsp;&nbsp; ├── main
+    │&nbsp;&nbsp; │&nbsp;&nbsp; ├── errors.py
+    │&nbsp;&nbsp; │&nbsp;&nbsp; ├── forms.py
+    │&nbsp;&nbsp; │&nbsp;&nbsp; ├── __init__.py
+    │&nbsp;&nbsp; │&nbsp;&nbsp; └── views.py
+    │&nbsp;&nbsp; ├── models.py
+    │&nbsp;&nbsp; ├── mqtt_func
+    │&nbsp;&nbsp; │&nbsp;&nbsp; ├── __init__.py
+    │&nbsp;&nbsp; │&nbsp;&nbsp; ├── mqtt_func.py
+    │&nbsp;&nbsp; ├── static
+    │&nbsp;&nbsp; │&nbsp;&nbsp; ├── favicon.ico
+    │&nbsp;&nbsp; │&nbsp;&nbsp; └── styles.css
+    │&nbsp;&nbsp; └── templates
+    │&nbsp;&nbsp;     ├── 403.html
+    │&nbsp;&nbsp;     ├── 404.html
+    │&nbsp;&nbsp;     ├── 500.html
+    │&nbsp;&nbsp;     ├── auth
+    │&nbsp;&nbsp;     │&nbsp;&nbsp; ├── change_password.html
+    │&nbsp;&nbsp;     │&nbsp;&nbsp; ├── login.html
+    │&nbsp;&nbsp;     │&nbsp;&nbsp; └── register.html
+    │&nbsp;&nbsp;     ├── base.html
+    │&nbsp;&nbsp;     ├── camera
+    │&nbsp;&nbsp;     │&nbsp;&nbsp; ├── cam-cv-face.html
+    │&nbsp;&nbsp;     │&nbsp;&nbsp; ├── cam-cv.html
+    │&nbsp;&nbsp;     │&nbsp;&nbsp; ├── cam-cv-motion.html
+    │&nbsp;&nbsp;     │&nbsp;&nbsp; ├── camera.html
+    │&nbsp;&nbsp;     │&nbsp;&nbsp; ├── cam-servos.html
+    │&nbsp;&nbsp;     │&nbsp;&nbsp; └── files.html
+    │&nbsp;&nbsp;     ├── exclude_number.html
+    │&nbsp;&nbsp;     ├── index.html
+    │&nbsp;&nbsp;     ├── moderate.html
+    │&nbsp;&nbsp;     ├── moderate_number.html
+    │&nbsp;&nbsp;     └── project_info.html
+    ├── cliente
+    │&nbsp;&nbsp; └── cliente_mqtt.py
+    ├── config.py
+    ├── data-dev.sqlite
+    ├── LICENSE
+    ├── log.txt
+    ├── migrations
+    │&nbsp;&nbsp; ├── alembic.ini
+    │&nbsp;&nbsp; ├── env.py
+    ├── README.md
+    ├── requirements.txt
+    ├── saved_model
+    │&nbsp;&nbsp; ├── deploy.prototxt.txt
+    │&nbsp;&nbsp; ├── haarcascade_frontalface_alt.xml
+    │&nbsp;&nbsp; ├── haarcascade_frontalface_default.xml
+    │&nbsp;&nbsp; ├── lbpcascade_frontalface.xml
+    │&nbsp;&nbsp; └── res10_300x300_ssd_iter_140000.caffemodel
+    ├── shots
+    ├── videos
+    ├── vigisel.py
+    └── vigiSEL.service
+</code></pre>
+<h2>/cliente</h2>
+<p>Cliente em python para escutar o tópico em MQTT, pode ser necessário alterar o broker para público ou privado a depender da utilização</p>
+<h2>/videos</h2>
+<p>Diretório de salvamento de vídeos gravados</p>
+<h2>/app</h2>
+<p>Projeto e servidor principal</p>
+<h3><strong>/app/auth</strong></h3>
+<p><a href="https://flask-login.readthedocs.io/en/latest/" target="_blank" rel="noopener noreferrer">https://flask-login.readthedocs.io/en/latest/</a></p>
+<p>Diretório da blueprint de autenticação de usuário (automatizada por <em>Flask-login</em>):</p>
+<ul>
+<li>Login</li>
+<li>Logout</li>
+<li>Registro</li>
+<li>Mudança de senha</li>
+</ul>
+<h3><strong>/app/camera</strong></h3>
+<p>Diretório da blueprint de requisições para a câmera e servos.</p>
+<p>Documentação da câmera: <a href="https://github.com/vcs512/rasp-iot/tree/master/app/camera" target="_blank" rel="noopener noreferrer">https://github.com/vcs512/rasp-iot/tree/master/app/camera</a></p>
+<p>Documentação dos servos: <a href="https://github.com/Eliel-Santo/Servo_Control" target="_blank" rel="noopener noreferrer">https://github.com/Eliel-Santo/Servo_Control</a></p>
+<h3><strong>/app/main</strong></h3>
+<p>Diretório da blueprint de moderação de usuários, exclusiva para administrador:</p>
+<ul>
+<li>Troca de <em>roles</em></li>
+<li>Exclusão de usuários pelo administrador</li>
+</ul>
+<h3><strong>/app/mqtt_func</strong></h3>
+<p>Diretório com as funções utilizadas para publicar mensagens com MQTT, pode ser necessário alterar o broker para público ou privado a depender da utilização</p>
+<h1>Start on boot</h1>
+<p>Colocar os seguintes comandos em /etc/rc.local</p>
+<pre><code class="language-bash">## Change MAC
+ip link set eth0 down
+ip link set eth0 address 00:01:02:03:04:05
+ip link set eth0 up
+## Start virtualenv
+. /home/sel/Code/venv/bin/activate
+export FLASK_APP=/home/sel/Code/rasp-iot/vigisel.py
+## Start GPIO daemon
+pigpiod
+## Start server
+flask run --host 0.0.0.0
+</code></pre>
+<p>reiniciar a rasp em seguida:</p>
+<pre><code>sudo reboot
+</code></pre>
+<h1>Requisitos adicionais</h1>
+<h2>OpenCV</h2>
+<p><a href="https://stackoverflow.com/questions/53347759/importerror-libcblas-so-3-cannot-open-shared-object-file-no-such-file-or-dire" target="_blank" rel="noopener noreferrer">https://stackoverflow.com/questions/53347759/importerror-libcblas-so-3-cannot-open-shared-object-file-no-such-file-or-dire</a></p>
 <pre><code class="language-bash">pip3 install opencv-python 
 sudo apt-get install libcblas-dev
 sudo apt-get install libhdf5-dev
@@ -87,10 +188,35 @@ sudo apt-get install libjasper-dev
 sudo apt-get install libqtgui4 
 sudo apt-get install libqt4-test
 </code></pre>
-<h2 id="pigpio">pigpio</h2>
-<pre><code class="language-bash">sudo apt-get install python3-pigpio
-sudo pigpiod
+<h2>broker MQTT local - Mosquitto</h2>
+<pre><code class="language-bash">sudo apt install mosquitto
+sudo apt install mosquitto-client
 </code></pre>
+<h3>rodar o mosquitto</h3>
+<pre><code class="language-bash">sudo systemctl start mosquitto.service
+</code></pre>
+<h4>rodar o cliente simples externo:</h4>
+<pre><code class="language-bash">cd cliente
+python cliente_mqtt.py
+</code></pre>
+<h1>Referências</h1>
+<h2>Flask e organização de projeto</h2>
+<p>GRINBERG, Miguel. <strong>Flask web development: developing web applications with python</strong>. " O'Reilly Media, Inc.", 2018.</p>
+<h2>Base de projeto</h2>
+<p><a href="https://github.com/jordeam/macbee" target="_blank" rel="noopener noreferrer">https://github.com/jordeam/macbee</a></p>
+<p><a href="https://github.com/miguelgrinberg/flasky-first-edition" target="_blank" rel="noopener noreferrer">https://github.com/miguelgrinberg/flasky-first-edition</a></p>
+<p><a href="https://github.com/miguelgrinberg/flasky" target="_blank" rel="noopener noreferrer">https://github.com/miguelgrinberg/flasky</a></p>
+<h2>Streaming de câmera</h2>
+<p><a href="https://towardsdatascience.com/camera-app-with-flask-and-opencv-bd147f6c0eec" target="_blank" rel="noopener noreferrer">https://towardsdatascience.com/camera-app-with-flask-and-opencv-bd147f6c0eec</a></p>
+<p><a href="https://github.com/hemanth-nag/Camera_Flask_App" target="_blank" rel="noopener noreferrer">https://github.com/hemanth-nag/Camera_Flask_App</a></p>
+<h2>Visão computacional</h2>
+<h3>Detecção de movimento</h3>
+<p><a href="https://automaticaddison.com/motion-detection-using-opencv-on-raspberry-pi-4/" target="_blank" rel="noopener noreferrer">https://automaticaddison.com/motion-detection-using-opencv-on-raspberry-pi-4/</a></p>
+<h3>Detecção de face</h3>
+<p><a href="https://github.com/informramiz/Face-Detection-OpenCV" target="_blank" rel="noopener noreferrer">https://github.com/informramiz/Face-Detection-OpenCV</a></p>
+<h2>MQTT</h2>
+<p><a href="https://flask-mqtt.readthedocs.io/en/latest/usage.html#connect-to-a-broker" target="_blank" rel="noopener noreferrer">https://flask-mqtt.readthedocs.io/en/latest/usage.html#connect-to-a-broker</a></p>
+<p><a href="https://github.com/SinaHBN/IoT" target="_blank" rel="noopener noreferrer">https://github.com/SinaHBN/IoT</a></p>
 
 
 {% endblock %}

@@ -3,8 +3,8 @@ import random
 from paho.mqtt import client as mqtt_client
 
 
-# broker = '10.235.10.31'
-broker = 'broker.hivemq.com'
+# broker = '143.107. . '            # broker na rasp
+broker = 'broker.hivemq.com'    # broker publico
 port = 1883
 topic = "sel0373/vigiSEL/Motion"
 # generate client ID with pub prefix randomly

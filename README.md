@@ -1,6 +1,14 @@
 vigiSEL
 ======
 
+# Iniciar GPIO
+Iniciar *daemon* de controle da GPIO:
+
+```bash
+sudo apt-get install python3-pigpio
+sudo pigpiod
+```
+
 # Iniciar servidor
 ```bash
 export FLASK_APP=vigisel.py
@@ -8,6 +16,8 @@ flask run --host 0.0.0.0
 ```
 
 # Banco de Dados
+
+Documentação adicional em https://github.com/vcs512/rasp-iot/tree/master/app
 
 ## Criar e atualizar o banco de dados
 
@@ -17,7 +27,7 @@ flask db migrate
 flask db upgrade
 ```
 
-Abrir shell:
+## Abrir shell:
 
 ```python
 flask shell
@@ -25,7 +35,7 @@ flask shell
 
 ## Roles
 
-Carregar Roles do schema:
+Carregar Roles:
 ```python
 Role.insert_roles()
 ```
@@ -36,9 +46,8 @@ role_user = Role.query.filter_by(name='User').first()
 role_moderator = Role.query.filter_by(name='Moderator').first()
 role_admin = Role.query.filter_by(name='Administrator').first()
 ```
-Procuram a tabela de Roles por nome e encontram sua chave primária.
 
-## Usuários
+## Operações com usuários por shell
 
 ### Adicionar
 
@@ -73,26 +82,11 @@ User.query.filter(User.email == 'vigisel@gmail.com').delete()
 db.session.commit()
 ```
 
-## Start on boot
+### Sair da shell
+```python
+exit()
+```
 
-Colocar os seguintes comandos em /etc/rc.local
-```bash
-## Change MAC
-ip link set eth0 down
-ip link set eth0 address 00:01:02:03:04:05
-ip link set eth0 up
-## Start virtualenv
-. /home/sel/Code/venv/bin/activate
-export FLASK_APP=/home/sel/Code/rasp-iot/vigisel.py
-## Start GPIO daemon
-pigpiod
-## Start server
-flask run --host 0.0.0.0
-```
-reiniciar a rasp em seguida: 
-```
-sudo reboot
-```
 
 # Arquitetura do projeto
 ```bash
@@ -170,27 +164,69 @@ sudo reboot
     ├── videos
     ├── vigisel.py
     └── vigiSEL.service
+```
 
-28 directories, 89 files
+## /cliente
+Cliente em python para escutar o tópico em MQTT, pode ser necessário alterar o broker para público ou privado a depender da utilização
+
+## /videos
+Diretório de salvamento de vídeos gravados
+
+## /app
+Projeto e servidor principal
+
+### **/app/auth**
+https://flask-login.readthedocs.io/en/latest/
+
+Diretório da blueprint de autenticação de usuário (automatizada por *Flask-login*):
+- Login
+- Logout
+- Registro
+- Mudança de senha
+
+### **/app/camera**
+Diretório da blueprint de requisições para a câmera e servos.
+
+Documentação da câmera: https://github.com/vcs512/rasp-iot/tree/master/app/camera
+
+Documentação dos servos: https://github.com/Eliel-Santo/Servo_Control
+
+
+### **/app/main**
+Diretório da blueprint de moderação de usuários, exclusiva para administrador:
+- Troca de *roles*
+- Exclusão de usuários pelo administrador
+
+### **/app/mqtt_func**
+Diretório com as funções utilizadas para publicar mensagens com MQTT, pode ser necessário alterar o broker para público ou privado a depender da utilização
+
+
+
+# Start on boot
+
+Colocar os seguintes comandos em /etc/rc.local
+```bash
+## Change MAC
+ip link set eth0 down
+ip link set eth0 address 00:01:02:03:04:05
+ip link set eth0 up
+## Start virtualenv
+. /home/sel/Code/venv/bin/activate
+export FLASK_APP=/home/sel/Code/rasp-iot/vigisel.py
+## Start GPIO daemon
+pigpiod
+## Start server
+flask run --host 0.0.0.0
+```
+reiniciar a rasp em seguida: 
+```
+sudo reboot
 ```
 
 
-# Referências
+# Requisitos adicionais
 
-## Flask e organização de projeto
-GRINBERG, Miguel. **Flask web development: developing web applications with python**. " O'Reilly Media, Inc.", 2018.
-
-## Base e organização de projeto
-https://github.com/jordeam/macbee
-
-https://github.com/miguelgrinberg/flasky-first-edition
-
-https://github.com/miguelgrinberg/flasky
-
-
-
-## Visão computacional
-### Requerimentos OpenCV
+## OpenCV
 https://stackoverflow.com/questions/53347759/importerror-libcblas-so-3-cannot-open-shared-object-file-no-such-file-or-dire
 
 ```bash
@@ -204,11 +240,46 @@ sudo apt-get install libqtgui4
 sudo apt-get install libqt4-test
 ```
 
+## broker MQTT local - Mosquitto
+```bash
+sudo apt install mosquitto
+sudo apt install mosquitto-client
+```
 
-### Streaming de camera
+### rodar o mosquitto
+```bash
+sudo systemctl start mosquitto.service
+```
+
+#### rodar o cliente simples externo:
+```bash
+cd cliente
+python cliente_mqtt.py
+```
+
+
+
+# Referências
+
+## Flask e organização de projeto
+GRINBERG, Miguel. **Flask web development: developing web applications with python**. " O'Reilly Media, Inc.", 2018.
+
+## Base de projeto
+https://github.com/jordeam/macbee
+
+https://github.com/miguelgrinberg/flasky-first-edition
+
+https://github.com/miguelgrinberg/flasky
+
+
+
+## Streaming de câmera
 https://towardsdatascience.com/camera-app-with-flask-and-opencv-bd147f6c0eec
 
 https://github.com/hemanth-nag/Camera_Flask_App
+
+
+## Visão computacional
 
 ### Detecção de movimento
 https://automaticaddison.com/motion-detection-using-opencv-on-raspberry-pi-4/
@@ -218,31 +289,7 @@ https://github.com/informramiz/Face-Detection-OpenCV
 
 
 
-## Controle de servos
-### pigpio
-```bash
-sudo apt-get install python3-pigpio
-sudo pigpiod
-```
-
-
 ## MQTT
 https://flask-mqtt.readthedocs.io/en/latest/usage.html#connect-to-a-broker
 
 https://github.com/SinaHBN/IoT
-
-### instalar o Mosquitto:
-```bash
-sudo apt install mosquitto
-```
-
-## rodar o mosquitto
-```bash
-sudo systemctl start mosquitto.service
-```
-
-### rodar o cliente simples externo:
-```bash
-cd cliente
-python cliente_mqtt.py
-```

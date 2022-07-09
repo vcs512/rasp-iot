@@ -221,36 +221,7 @@ def Center_Object(pos_H,pos_V,Resolucao_H=3280,Resolucao_V=2464):
     Angulo_Atual_V=inv_func(pwm.get_servo_pulsewidth(servo_V)) 
     
     Sinal_V=0.0
-    Sinal_H=0.0
-
-    # if pos_H > .7*Resolucao_H:
-    #     pos_H = .7*Resolucao_H
-
-    # if pos_V > .9*Resolucao_V:
-    #     pos_V = .9*Resolucao_V
-
-    # if Angulo_Atual_H >= 0:
-    #     if pos_H>=Resolucao_H/2.0:
-    #         Sinal_H=-1.0
-    #     else:
-    #         Sinal_H=1.0
-    # elif Angulo_Atual_H < 0:
-    #     if pos_H>=Resolucao_H/2.0:
-    #         Sinal_H=1.0
-    #     else:
-    #         Sinal_H=-1.0
-    # if Angulo_Atual_V >= 0:
-    #     if pos_V>=Resolucao_V/2.0:
-    #         Sinal_V=1.0
-    #     else:
-    #         Sinal_V=-1.0 
-
-    # elif Angulo_Atual_V < 0:
-
-    #     if pos_V>=Resolucao_V/2.0:
-    #         Sinal_V=-1.0
-    #     else:
-    #         Sinal_V=1.0      
+    Sinal_H=0.0 
 
     print('Angulo_Atual_H = ', Angulo_Atual_H)
     angulo_H=Angulo_Atual_H-5.0*math.degrees(math.atan((1.0*(pos_H-Resolucao_H/2.0)*Sx)/f))
