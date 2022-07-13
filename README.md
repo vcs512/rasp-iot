@@ -221,6 +221,8 @@ ip link set eth0 up
 export FLASK_APP=/home/sel/Code/rasp-iot/vigisel.py
 ## Start GPIO daemon
 pigpiod
+## Set servo to start position
+python3 /home/sel/Code/rasp-iot/start_servo.py
 ## Start server
 flask run --host 0.0.0.0
 ```
