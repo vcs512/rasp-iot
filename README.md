@@ -75,7 +75,7 @@ db.session.commit()
 Obter a referência para o objeto do usuário e alterar o campo desejado:
 ```python
 u = User.query.filter_by(email='vigisel@gmail.com').first()
-u.role = role_admin
+u.role = role_moderator
 db.session.commit()
 ```
 
